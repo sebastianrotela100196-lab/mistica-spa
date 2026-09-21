@@ -49,27 +49,65 @@ function fullDate(date: Date) {
   });
 }
 
+const servicePriority = [
+  "Masaje terapéutico",
+  "Masaje descontracturante",
+  "Masaje relajante",
+  "Sauna seca",
+  "Masaje deportivo",
+  "Liberación miofascial craneal",
+  "Terapia para bruxismo y ATM",
+  "Drenaje linfático",
+  "Shiatsu",
+  "Masaje reductor",
+  "Masaje reductor moldeador de cintura de avispa",
+  "Masaje postoperatorio de recuperación",
+  "Tratamiento anticelulítico",
+  "Levantamiento de glúteo",
+  "Limpieza facial express",
+  "Limpieza facial profunda",
+  "Baño de luna",
+  "Manicura",
+  "Pedicura",
+];
+
+function sortServices(services: Service[]) {
+  return [...services].sort((a, b) => {
+    const aIndex = servicePriority.indexOf(a.name);
+    const bIndex = servicePriority.indexOf(b.name);
+
+    const safeA =
+      aIndex === -1
+        ? servicePriority.length
+        : aIndex;
+
+    const safeB =
+      bIndex === -1
+        ? servicePriority.length
+        : bIndex;
+
+    if (safeA !== safeB) {
+      return safeA - safeB;
+    }
+
+    return a.name.localeCompare(
+      b.name,
+      "es"
+    );
+  });
+}
+
 function cleanTime(value: string) {
   return value.slice(0, 5);
 }
 
-/*
- * Convierte números paraguayos a formato internacional.
- *
- * Ejemplos:
- * 0981 123 456     -> +595981123456
- * 0984-123-456     -> +595984123456
- * +595 981 123456  -> +595981123456
- */
 function normalizeParaguayPhone(value: string) {
   const digits = value.replace(/\D/g, "");
 
-  // Formato local: 09XX XXX XXX
   if (/^09\d{8}$/.test(digits)) {
     return `+595${digits.slice(1)}`;
   }
 
-  // Formato internacional sin +
   if (/^5959\d{8}$/.test(digits)) {
     return `+${digits}`;
   }
@@ -84,85 +122,132 @@ function isValidParaguayPhone(value: string) {
 }
 
 function getEndTime(startTime: string) {
-  const [hours] = startTime.split(":").map(Number);
+  const [hours] = startTime
+    .split(":")
+    .map(Number);
 
   const nextHour = hours + 1;
 
-  return `${String(nextHour).padStart(2, "0")}:00`;
+  return `${String(nextHour).padStart(
+    2,
+    "0"
+  )}:00`;
 }
 
 export default function BookingForm() {
-  const [services, setServices] = useState<Service[]>([]);
-  const [staff, setStaff] = useState<Staff[]>([]);
+  const [services, setServices] =
+    useState<Service[]>([]);
 
-  const [serviceId, setServiceId] = useState("");
-  const [staffId, setStaffId] = useState("");
+  const [staff, setStaff] =
+    useState<Staff[]>([]);
 
-  const [duration, setDuration] = useState<number | null>(null);
+  const [serviceId, setServiceId] =
+    useState("");
 
-  const [selectedDate, setSelectedDate] =
-    useState<Date | null>(null);
+  const [staffId, setStaffId] =
+    useState("");
 
-  const [selectedTime, setSelectedTime] = useState("");
+  const [duration, setDuration] =
+    useState<number | null>(null);
 
-  const [availableTimes, setAvailableTimes] =
-    useState<string[]>([]);
+  const [
+    selectedDate,
+    setSelectedDate,
+  ] = useState<Date | null>(null);
 
-  const [name, setName] = useState("");
-  const [phone, setPhone] = useState("");
-  const [notes, setNotes] = useState("");
+  const [
+    selectedTime,
+    setSelectedTime,
+  ] = useState("");
 
-  const [loadingServices, setLoadingServices] =
-    useState(true);
+  const [
+    availableTimes,
+    setAvailableTimes,
+  ] = useState<string[]>([]);
 
-  const [loadingStaff, setLoadingStaff] =
-    useState(true);
+  const [name, setName] =
+    useState("");
 
-  const [loadingTimes, setLoadingTimes] =
+  const [phone, setPhone] =
+    useState("");
+
+  const [notes, setNotes] =
+    useState("");
+
+  const [
+    loadingServices,
+    setLoadingServices,
+  ] = useState(true);
+
+  const [
+    loadingStaff,
+    setLoadingStaff,
+  ] = useState(true);
+
+  const [
+    loadingTimes,
+    setLoadingTimes,
+  ] = useState(false);
+
+  const [saving, setSaving] =
     useState(false);
 
-  const [saving, setSaving] = useState(false);
+  const [
+    errorMessage,
+    setErrorMessage,
+  ] = useState("");
 
-  const [errorMessage, setErrorMessage] =
-    useState("");
+  const [
+    successMessage,
+    setSuccessMessage,
+  ] = useState("");
 
-  const [successMessage, setSuccessMessage] =
-    useState("");
+  const selectedService =
+    services.find(
+      (service) =>
+        service.id === serviceId
+    );
 
-  const selectedService = services.find(
-    (service) => service.id === serviceId
-  );
+  const selectedStaff =
+    staff.find(
+      (person) =>
+        person.id === staffId
+    );
 
-  const selectedStaff = staff.find(
-    (person) => person.id === staffId
-  );
+  const availableDays =
+    useMemo(() => {
+      const days: Date[] = [];
+      const today = new Date();
 
-  /*
-   * Mostramos los próximos 14 días disponibles.
-   * Domingo queda fuera.
-   */
-  const availableDays = useMemo(() => {
-    const days: Date[] = [];
-    const today = new Date();
+      let offset = 0;
 
-    let offset = 0;
+      while (days.length < 14) {
+        const date =
+          new Date(today);
 
-    while (days.length < 14) {
-      const date = new Date(today);
+        date.setHours(
+          12,
+          0,
+          0,
+          0
+        );
 
-      date.setHours(12, 0, 0, 0);
-      date.setDate(today.getDate() + offset);
+        date.setDate(
+          today.getDate() +
+            offset
+        );
 
-      // Domingo = 0
-      if (date.getDay() !== 0) {
-        days.push(date);
+        if (
+          date.getDay() !== 0
+        ) {
+          days.push(date);
+        }
+
+        offset++;
       }
 
-      offset++;
-    }
-
-    return days;
-  }, []);
+      return days;
+    }, []);
 
   /*
    * CARGAR SERVICIOS
@@ -171,7 +256,10 @@ export default function BookingForm() {
     async function loadServices() {
       setLoadingServices(true);
 
-      const { data, error } = await supabase
+      const {
+        data,
+        error,
+      } = await supabase
         .from("services")
         .select(
           "id, name, category, allowed_durations"
@@ -187,8 +275,13 @@ export default function BookingForm() {
           "No pudimos cargar los servicios. Intenta nuevamente."
         );
       } else {
+        const orderedServices =
+          sortServices(
+            (data ?? []) as Service[]
+          );
+
         setServices(
-          (data ?? []) as Service[]
+          orderedServices
         );
       }
 
@@ -205,9 +298,14 @@ export default function BookingForm() {
     async function loadStaff() {
       setLoadingStaff(true);
 
-      const { data, error } = await supabase
+      const {
+        data,
+        error,
+      } = await supabase
         .from("staff")
-        .select("id, name, active")
+        .select(
+          "id, name, active"
+        )
         .eq("active", true)
         .order("name");
 
@@ -230,31 +328,37 @@ export default function BookingForm() {
   }, []);
 
   /*
-   * CONSULTAR HORARIOS DISPONIBLES.
-   *
-   * La disponibilidad depende de:
-   * - fecha
-   * - masajista
-   *
-   * No depende de si el masaje dura 30, 45 o 60 min,
-   * porque cada reserva bloquea una hora completa.
+   * HORARIOS DISPONIBLES
    */
   useEffect(() => {
     async function loadAvailableTimes() {
-      if (!selectedDate || !staffId) {
+      if (
+        !selectedDate ||
+        !staffId
+      ) {
         setAvailableTimes([]);
         return;
       }
 
       setLoadingTimes(true);
+
       setSelectedTime("");
+
       setErrorMessage("");
 
-      const { data, error } = await supabase.rpc(
+      const {
+        data,
+        error,
+      } = await supabase.rpc(
         "get_available_slots",
         {
-          p_date: dateToYMD(selectedDate),
-          p_staff_id: staffId,
+          p_date:
+            dateToYMD(
+              selectedDate
+            ),
+
+          p_staff_id:
+            staffId,
         }
       );
 
@@ -266,78 +370,119 @@ export default function BookingForm() {
         );
 
         setAvailableTimes([]);
+
         setLoadingTimes(false);
 
         return;
       }
 
-      let times = (data ?? []).map(
-        (row: { slot_time: string }) =>
-          cleanTime(row.slot_time)
-      );
+      let times =
+        (data ?? []).map(
+          (
+            row: {
+              slot_time: string;
+            }
+          ) =>
+            cleanTime(
+              row.slot_time
+            )
+        );
 
-      /*
-       * Seguridad adicional:
-       * solamente mostramos horas completas.
-       */
-      times = times.filter((time: string) =>
-        time.endsWith(":00")
-      );
+      times =
+        times.filter(
+          (time: string) =>
+            time.endsWith(
+              ":00"
+            )
+        );
 
-      /*
-       * Si el cliente selecciona hoy,
-       * ocultamos los horarios que ya pasaron.
-       */
-      const now = new Date();
+      const now =
+        new Date();
 
-      if (sameDay(selectedDate, now)) {
+      if (
+        sameDay(
+          selectedDate,
+          now
+        )
+      ) {
         const currentMinutes =
-          now.getHours() * 60 +
+          now.getHours() *
+            60 +
           now.getMinutes();
 
-        times = times.filter(
-          (time: string) => {
-            const [hours, minutes] = time
-              .split(":")
-              .map(Number);
+        times =
+          times.filter(
+            (
+              time: string
+            ) => {
+              const [
+                hours,
+                minutes,
+              ] =
+                time
+                  .split(":")
+                  .map(
+                    Number
+                  );
 
-            const slotMinutes =
-              hours * 60 + minutes;
+              const slotMinutes =
+                hours * 60 +
+                minutes;
 
-            return slotMinutes >
-              currentMinutes;
-          }
-        );
+              return (
+                slotMinutes >
+                currentMinutes
+              );
+            }
+          );
       }
 
-      setAvailableTimes(times);
+      setAvailableTimes(
+        times
+      );
+
       setLoadingTimes(false);
     }
 
     loadAvailableTimes();
-  }, [selectedDate, staffId]);
+  }, [
+    selectedDate,
+    staffId,
+  ]);
 
-  function handleServiceChange(id: string) {
+  function handleServiceChange(
+    id: string
+  ) {
     setServiceId(id);
 
     setDuration(null);
+
     setStaffId("");
+
     setSelectedDate(null);
+
     setSelectedTime("");
+
     setAvailableTimes([]);
 
     setErrorMessage("");
+
     setSuccessMessage("");
   }
 
-  function handleStaffChange(id: string) {
+  function handleStaffChange(
+    id: string
+  ) {
     setStaffId(id);
 
     setSelectedDate(null);
+
     setSelectedTime("");
+
     setAvailableTimes([]);
 
     setErrorMessage("");
+
     setSuccessMessage("");
   }
 
@@ -346,11 +491,9 @@ export default function BookingForm() {
    */
   async function createReservation() {
     setErrorMessage("");
+
     setSuccessMessage("");
 
-    /*
-     * SERVICIO
-     */
     if (!selectedService) {
       setErrorMessage(
         "Debes seleccionar un servicio."
@@ -359,9 +502,6 @@ export default function BookingForm() {
       return;
     }
 
-    /*
-     * DURACIÓN
-     */
     if (!duration) {
       setErrorMessage(
         "Debes seleccionar la duración del servicio."
@@ -370,9 +510,6 @@ export default function BookingForm() {
       return;
     }
 
-    /*
-     * PROFESIONAL
-     */
     if (!selectedStaff) {
       setErrorMessage(
         "Debes seleccionar una profesional."
@@ -381,9 +518,6 @@ export default function BookingForm() {
       return;
     }
 
-    /*
-     * FECHA
-     */
     if (!selectedDate) {
       setErrorMessage(
         "Debes seleccionar un día."
@@ -392,9 +526,6 @@ export default function BookingForm() {
       return;
     }
 
-    /*
-     * HORARIO
-     */
     if (!selectedTime) {
       setErrorMessage(
         "Debes seleccionar un horario."
@@ -403,9 +534,6 @@ export default function BookingForm() {
       return;
     }
 
-    /*
-     * NOMBRE OBLIGATORIO
-     */
     if (!name.trim()) {
       setErrorMessage(
         "Debes ingresar tu nombre y apellido."
@@ -414,9 +542,6 @@ export default function BookingForm() {
       return;
     }
 
-    /*
-     * WHATSAPP OBLIGATORIO
-     */
     if (!phone.trim()) {
       setErrorMessage(
         "Debes ingresar tu número de WhatsApp."
@@ -425,10 +550,11 @@ export default function BookingForm() {
       return;
     }
 
-    /*
-     * VALIDAR NÚMERO PARAGUAYO
-     */
-    if (!isValidParaguayPhone(phone)) {
+    if (
+      !isValidParaguayPhone(
+        phone
+      )
+    ) {
       setErrorMessage(
         "Ingresa un número de WhatsApp válido de Paraguay. Ejemplo: 0981 123 456 o +595 981 123 456."
       );
@@ -437,16 +563,19 @@ export default function BookingForm() {
     }
 
     const normalizedPhone =
-      normalizeParaguayPhone(phone);
+      normalizeParaguayPhone(
+        phone
+      );
 
     setSaving(true);
 
-    const reservedTime = selectedTime;
+    const reservedTime =
+      selectedTime;
 
-    /*
-     * GUARDAR EN SUPABASE
-     */
-    const { data, error } =
+    const {
+      data,
+      error,
+    } =
       await supabase.rpc(
         "create_booking",
         {
@@ -466,19 +595,19 @@ export default function BookingForm() {
             duration,
 
           p_date:
-            dateToYMD(selectedDate),
+            dateToYMD(
+              selectedDate
+            ),
 
           p_time:
             `${reservedTime}:00`,
 
           p_notes:
-            notes.trim() || null,
+            notes.trim() ||
+            null,
         }
       );
 
-    /*
-     * ERROR AL RESERVAR
-     */
     if (error) {
       console.error(error);
 
@@ -486,19 +615,25 @@ export default function BookingForm() {
         error.message.toLowerCase();
 
       if (
-        errorText.includes("reservado")
+        errorText.includes(
+          "reservado"
+        )
       ) {
         setErrorMessage(
           "Ese horario acaba de ser reservado con esta profesional. Elige otro horario."
         );
       } else if (
-        errorText.includes("disponible")
+        errorText.includes(
+          "disponible"
+        )
       ) {
         setErrorMessage(
           "Ese horario ya no está disponible. Elige otro."
         );
       } else if (
-        errorText.includes("whatsapp")
+        errorText.includes(
+          "whatsapp"
+        )
       ) {
         setErrorMessage(
           "Debes ingresar un número de WhatsApp válido de Paraguay."
@@ -510,17 +645,19 @@ export default function BookingForm() {
       }
 
       setSaving(false);
+
       setSelectedTime("");
 
-      /*
-       * Actualizamos la disponibilidad.
-       */
-      const { data: refreshed } =
+      const {
+        data: refreshed,
+      } =
         await supabase.rpc(
           "get_available_slots",
           {
             p_date:
-              dateToYMD(selectedDate),
+              dateToYMD(
+                selectedDate
+              ),
 
             p_staff_id:
               selectedStaff.id,
@@ -541,8 +678,12 @@ export default function BookingForm() {
                 )
             )
             .filter(
-              (time: string) =>
-                time.endsWith(":00")
+              (
+                time: string
+              ) =>
+                time.endsWith(
+                  ":00"
+                )
             )
         );
       }
@@ -553,18 +694,16 @@ export default function BookingForm() {
     const bookingId =
       data as string;
 
-    /*
-     * ACTUALIZAMOS HORARIOS.
-     *
-     * Aunque el masaje sea de 30 o 45 minutos,
-     * la hora completa queda ocupada para esa profesional.
-     */
-    const { data: refreshed } =
+    const {
+      data: refreshed,
+    } =
       await supabase.rpc(
         "get_available_slots",
         {
           p_date:
-            dateToYMD(selectedDate),
+            dateToYMD(
+              selectedDate
+            ),
 
           p_staff_id:
             selectedStaff.id,
@@ -585,8 +724,12 @@ export default function BookingForm() {
               )
           )
           .filter(
-            (time: string) =>
-              time.endsWith(":00")
+            (
+              time: string
+            ) =>
+              time.endsWith(
+                ":00"
+              )
           )
       );
     } else {
@@ -594,14 +737,12 @@ export default function BookingForm() {
         (current) =>
           current.filter(
             (time) =>
-              time !== reservedTime
+              time !==
+              reservedTime
           )
       );
     }
 
-    /*
-     * MENSAJE DE CONFIRMACIÓN
-     */
     setSuccessMessage(
       `Tu turno fue reservado correctamente con ${selectedStaff.name} para las ${reservedTime}. Código de reserva: ${bookingId.slice(
         0,
@@ -609,15 +750,12 @@ export default function BookingForm() {
       )}.`
     );
 
-    /*
-     * LIMPIAR DATOS PERSONALES.
-     *
-     * Dejamos servicio, duración, profesional
-     * y fecha seleccionados por comodidad.
-     */
     setName("");
+
     setPhone("");
+
     setNotes("");
+
     setSelectedTime("");
 
     setSaving(false);
@@ -635,22 +773,26 @@ export default function BookingForm() {
   return (
     <section
       id="reservar"
-      className="bg-[#e8d7cc] px-6 py-24"
+      className="relative overflow-hidden bg-[#F2EAF5] px-6 py-24"
     >
-      <div className="mx-auto max-w-5xl">
+      <div className="absolute -left-20 top-20 h-64 w-64 rounded-full bg-[#CDB3D9]/40 blur-3xl" />
+
+      <div className="absolute -right-24 bottom-10 h-72 w-72 rounded-full bg-[#815799]/15 blur-3xl" />
+
+      <div className="relative mx-auto max-w-5xl">
 
         {/* TÍTULO */}
         <div className="mx-auto mb-12 max-w-2xl text-center">
 
-          <p className="text-sm uppercase tracking-[0.35em] text-[#765648]">
+          <p className="text-sm font-semibold uppercase tracking-[0.35em] text-[#815799]">
             Reserva online
           </p>
 
-          <h2 className="mt-4 text-4xl font-light md:text-5xl">
+          <h2 className="mt-4 font-display text-5xl font-semibold text-[#3B174D] md:text-6xl">
             Reserva tu momento en Mistica Spa
           </h2>
 
-          <p className="mt-5 leading-7 text-[#675954]">
+          <p className="mt-5 leading-7 text-[#69636B]">
             Selecciona el servicio,
             la duración, la profesional,
             el día y el horario que prefieras.
@@ -658,13 +800,13 @@ export default function BookingForm() {
 
         </div>
 
-        <div className="rounded-[2rem] bg-white p-6 shadow-sm md:p-10">
+        <div className="rounded-[2rem] border border-[#E1D5E6] bg-white p-6 shadow-[0_25px_60px_rgba(74,35,86,0.10)] md:p-10">
 
           {/* ÉXITO */}
           {successMessage && (
             <div className="mb-8 rounded-2xl border border-green-200 bg-green-50 p-5 text-green-800">
 
-              <p className="font-medium">
+              <p className="font-semibold">
                 Reserva confirmada
               </p>
 
@@ -673,8 +815,7 @@ export default function BookingForm() {
               </p>
 
               <p className="mt-2 text-sm">
-                Tu turno ya aparece en la agenda
-                de Mistica Spa.
+                Tu turno ya aparece en la agenda de Mistica Spa.
               </p>
 
             </div>
@@ -690,19 +831,25 @@ export default function BookingForm() {
           {/* 1. SERVICIO */}
           <div>
 
-            <p className="mb-4 text-lg font-medium">
+            <p className="mb-4 text-lg font-semibold text-[#3B174D]">
               1. Elige tu servicio
             </p>
 
             <select
-              value={serviceId}
-              disabled={loadingServices}
-              onChange={(event) =>
+              value={
+                serviceId
+              }
+              disabled={
+                loadingServices
+              }
+              onChange={(
+                event
+              ) =>
                 handleServiceChange(
                   event.target.value
                 )
               }
-              className="w-full rounded-xl border border-[#dfd2c7] bg-white px-4 py-4 outline-none focus:border-[#765648] disabled:opacity-50"
+              className="w-full rounded-xl border border-[#CDB3D9] bg-white px-4 py-4 text-[#2E2830] outline-none transition focus:border-[#815799] focus:ring-4 focus:ring-[#815799]/10 disabled:opacity-50"
             >
 
               <option value="">
@@ -714,10 +861,16 @@ export default function BookingForm() {
               {services.map(
                 (service) => (
                   <option
-                    key={service.id}
-                    value={service.id}
+                    key={
+                      service.id
+                    }
+                    value={
+                      service.id
+                    }
                   >
-                    {service.name}
+                    {
+                      service.name
+                    }
                   </option>
                 )
               )}
@@ -730,7 +883,7 @@ export default function BookingForm() {
           {selectedService && (
             <div className="mt-10">
 
-              <p className="mb-4 text-lg font-medium">
+              <p className="mb-4 text-lg font-semibold text-[#3B174D]">
                 2. Elige la duración
               </p>
 
@@ -740,24 +893,36 @@ export default function BookingForm() {
                   .allowed_durations
                   .slice()
                   .sort(
-                    (a, b) =>
-                      a - b
+                    (
+                      a,
+                      b
+                    ) =>
+                      a -
+                      b
                   )
                   .map(
-                    (minutes) => (
+                    (
+                      minutes
+                    ) => (
 
                       <button
-                        key={minutes}
+                        key={
+                          minutes
+                        }
                         type="button"
                         onClick={() => {
                           setDuration(
                             minutes
                           );
 
-                          setStaffId("");
+                          setStaffId(
+                            ""
+                          );
+
                           setSelectedDate(
                             null
                           );
+
                           setSelectedTime(
                             ""
                           );
@@ -766,14 +931,17 @@ export default function BookingForm() {
                             ""
                           );
                         }}
-                        className={`rounded-xl border px-4 py-4 transition ${
+                        className={`rounded-xl border px-4 py-4 font-medium transition hover:-translate-y-0.5 ${
                           duration ===
                           minutes
-                            ? "border-[#765648] bg-[#765648] text-white"
-                            : "border-[#dfd2c7] bg-white hover:border-[#765648]"
+                            ? "border-[#815799] bg-[#815799] text-white shadow-md"
+                            : "border-[#D8C9DE] bg-white text-[#4A2356] hover:border-[#815799]"
                         }`}
                       >
-                        {minutes} min
+                        {
+                          minutes
+                        }{" "}
+                        min
                       </button>
 
                     )
@@ -781,7 +949,7 @@ export default function BookingForm() {
 
               </div>
 
-              <p className="mt-3 text-sm text-[#756762]">
+              <p className="mt-3 text-sm text-[#69636B]">
                 Independientemente de la duración,
                 cada turno ocupa un bloque de una hora
                 en la agenda.
@@ -794,13 +962,13 @@ export default function BookingForm() {
           {duration && (
             <div className="mt-10">
 
-              <p className="mb-4 text-lg font-medium">
+              <p className="mb-4 text-lg font-semibold text-[#3B174D]">
                 3. Elige tu profesional
               </p>
 
               {loadingStaff ? (
 
-                <div className="rounded-xl bg-[#f8f4ef] p-5 text-center text-sm text-[#756762]">
+                <div className="rounded-xl bg-[#F5F0F7] p-5 text-center text-sm text-[#69636B]">
                   Cargando profesionales...
                 </div>
 
@@ -809,25 +977,31 @@ export default function BookingForm() {
                 <div className="grid gap-3 md:grid-cols-2">
 
                   {staff.map(
-                    (person) => (
+                    (
+                      person
+                    ) => (
 
                       <button
-                        key={person.id}
+                        key={
+                          person.id
+                        }
                         type="button"
                         onClick={() =>
                           handleStaffChange(
                             person.id
                           )
                         }
-                        className={`rounded-xl border px-5 py-5 text-left transition ${
+                        className={`rounded-xl border px-5 py-5 text-left transition hover:-translate-y-0.5 ${
                           staffId ===
                           person.id
-                            ? "border-[#765648] bg-[#765648] text-white"
-                            : "border-[#dfd2c7] bg-white hover:border-[#765648]"
+                            ? "border-[#815799] bg-[#815799] text-white shadow-md"
+                            : "border-[#D8C9DE] bg-white hover:border-[#815799]"
                         }`}
                       >
-                        <span className="block font-medium">
-                          {person.name}
+                        <span className="block font-semibold">
+                          {
+                            person.name
+                          }
                         </span>
 
                         <span
@@ -835,7 +1009,7 @@ export default function BookingForm() {
                             staffId ===
                             person.id
                               ? "text-white/80"
-                              : "text-[#756762]"
+                              : "text-[#69636B]"
                           }`}
                         >
                           Masajista
@@ -856,14 +1030,16 @@ export default function BookingForm() {
           {selectedStaff && (
             <div className="mt-10">
 
-              <p className="mb-4 text-lg font-medium">
+              <p className="mb-4 text-lg font-semibold text-[#3B174D]">
                 4. Elige el día
               </p>
 
               <div className="flex gap-3 overflow-x-auto pb-3">
 
                 {availableDays.map(
-                  (date) => {
+                  (
+                    date
+                  ) => {
                     const active =
                       selectedDate &&
                       sameDay(
@@ -873,9 +1049,11 @@ export default function BookingForm() {
 
                     return (
                       <button
-                        key={dateToYMD(
-                          date
-                        )}
+                        key={
+                          dateToYMD(
+                            date
+                          )
+                        }
                         type="button"
                         onClick={() => {
                           setSelectedDate(
@@ -890,10 +1068,10 @@ export default function BookingForm() {
                             ""
                           );
                         }}
-                        className={`min-w-[110px] rounded-xl border px-4 py-4 text-center transition ${
+                        className={`min-w-[110px] rounded-xl border px-4 py-4 text-center transition hover:-translate-y-0.5 ${
                           active
-                            ? "border-[#765648] bg-[#765648] text-white"
-                            : "border-[#dfd2c7] bg-[#fbf8f5]"
+                            ? "border-[#815799] bg-[#815799] text-white shadow-md"
+                            : "border-[#D8C9DE] bg-[#FBF8FC] text-[#4A2356] hover:border-[#815799]"
                         }`}
                       >
                         <span className="block capitalize">
@@ -916,24 +1094,26 @@ export default function BookingForm() {
             selectedStaff && (
               <div className="mt-10">
 
-                <p className="mb-2 text-lg font-medium">
+                <p className="mb-2 text-lg font-semibold text-[#3B174D]">
                   5. Elige tu horario
                 </p>
 
-                <p className="mb-2 text-sm capitalize text-[#756762]">
+                <p className="mb-2 text-sm capitalize text-[#69636B]">
                   {fullDate(
                     selectedDate
                   )}
                 </p>
 
-                <p className="mb-5 text-sm text-[#756762]">
+                <p className="mb-5 text-sm text-[#69636B]">
                   Profesional:{" "}
-                  {selectedStaff.name}
+                  {
+                    selectedStaff.name
+                  }
                 </p>
 
                 {loadingTimes ? (
 
-                  <div className="rounded-xl bg-[#f8f4ef] p-6 text-center text-[#756762]">
+                  <div className="rounded-xl bg-[#F5F0F7] p-6 text-center text-[#69636B]">
                     Consultando horarios disponibles...
                   </div>
 
@@ -943,10 +1123,14 @@ export default function BookingForm() {
                   <div className="grid grid-cols-3 gap-3 sm:grid-cols-4 md:grid-cols-6">
 
                     {availableTimes.map(
-                      (time) => (
+                      (
+                        time
+                      ) => (
 
                         <button
-                          key={time}
+                          key={
+                            time
+                          }
                           type="button"
                           onClick={() => {
                             setSelectedTime(
@@ -961,14 +1145,16 @@ export default function BookingForm() {
                               ""
                             );
                           }}
-                          className={`rounded-xl border px-3 py-3 text-sm transition ${
+                          className={`rounded-xl border px-3 py-3 text-sm font-medium transition hover:-translate-y-0.5 ${
                             selectedTime ===
                             time
-                              ? "border-[#765648] bg-[#765648] text-white"
-                              : "border-[#dfd2c7] hover:border-[#765648]"
+                              ? "border-[#815799] bg-[#815799] text-white shadow-md"
+                              : "border-[#D8C9DE] bg-white text-[#4A2356] hover:border-[#815799]"
                           }`}
                         >
-                          {time}
+                          {
+                            time
+                          }
                         </button>
 
                       )
@@ -978,18 +1164,18 @@ export default function BookingForm() {
 
                 ) : (
 
-                  <div className="rounded-xl bg-[#f8f4ef] p-6 text-center text-[#756762]">
+                  <div className="rounded-xl bg-[#F5F0F7] p-6 text-center text-[#69636B]">
 
                     <p>
-                      No quedan horarios disponibles
-                      con{" "}
-                      {selectedStaff.name}{" "}
+                      No quedan horarios disponibles con{" "}
+                      {
+                        selectedStaff.name
+                      }{" "}
                       para este día.
                     </p>
 
                     <p className="mt-2 text-sm">
-                      Puedes elegir otra profesional
-                      o seleccionar otro día.
+                      Puedes elegir otra profesional o seleccionar otro día.
                     </p>
 
                   </div>
@@ -1003,11 +1189,11 @@ export default function BookingForm() {
           {selectedTime && (
             <div className="mt-10">
 
-              <p className="mb-2 text-lg font-medium">
+              <p className="mb-2 text-lg font-semibold text-[#3B174D]">
                 6. Tus datos
               </p>
 
-              <p className="mb-5 text-sm text-[#756762]">
+              <p className="mb-5 text-sm text-[#69636B]">
                 Los campos marcados con * son obligatorios.
               </p>
 
@@ -1015,7 +1201,7 @@ export default function BookingForm() {
 
                 <div>
 
-                  <label className="mb-2 block text-sm font-medium">
+                  <label className="mb-2 block text-sm font-semibold text-[#4A2356]">
                     Nombre y apellido *
                   </label>
 
@@ -1024,22 +1210,26 @@ export default function BookingForm() {
                     required
                     autoComplete="name"
                     placeholder="Ej: María González"
-                    value={name}
+                    value={
+                      name
+                    }
                     onChange={(
                       event
                     ) =>
                       setName(
-                        event.target.value
+                        event
+                          .target
+                          .value
                       )
                     }
-                    className="w-full rounded-xl border border-[#dfd2c7] px-4 py-4 outline-none focus:border-[#765648]"
+                    className="w-full rounded-xl border border-[#D8C9DE] px-4 py-4 outline-none transition focus:border-[#815799] focus:ring-4 focus:ring-[#815799]/10"
                   />
 
                 </div>
 
                 <div>
 
-                  <label className="mb-2 block text-sm font-medium">
+                  <label className="mb-2 block text-sm font-semibold text-[#4A2356]">
                     Número de WhatsApp *
                   </label>
 
@@ -1049,20 +1239,23 @@ export default function BookingForm() {
                     inputMode="tel"
                     autoComplete="tel"
                     placeholder="09XX XXX XXX o +595 9XX XXX XXX"
-                    value={phone}
+                    value={
+                      phone
+                    }
                     onChange={(
                       event
                     ) =>
                       setPhone(
-                        event.target.value
+                        event
+                          .target
+                          .value
                       )
                     }
-                    className="w-full rounded-xl border border-[#dfd2c7] px-4 py-4 outline-none focus:border-[#765648]"
+                    className="w-full rounded-xl border border-[#D8C9DE] px-4 py-4 outline-none transition focus:border-[#815799] focus:ring-4 focus:ring-[#815799]/10"
                   />
 
-                  <p className="mt-2 text-xs text-[#756762]">
-                    Ejemplo: 0981 123 456
-                    o +595 981 123 456
+                  <p className="mt-2 text-xs text-[#69636B]">
+                    Ejemplo: 0981 123 456 o +595 981 123 456
                   </p>
 
                 </div>
@@ -1071,40 +1264,51 @@ export default function BookingForm() {
 
               <textarea
                 placeholder="Observación opcional"
-                value={notes}
+                value={
+                  notes
+                }
                 onChange={(
                   event
                 ) =>
                   setNotes(
-                    event.target.value
+                    event
+                      .target
+                      .value
                   )
                 }
                 rows={3}
-                className="mt-5 w-full resize-none rounded-xl border border-[#dfd2c7] px-4 py-4 outline-none focus:border-[#765648]"
+                className="mt-5 w-full resize-none rounded-xl border border-[#D8C9DE] px-4 py-4 outline-none transition focus:border-[#815799] focus:ring-4 focus:ring-[#815799]/10"
               />
 
               {/* RESUMEN */}
-              <div className="mt-8 rounded-2xl bg-[#f8f4ef] p-6">
+              <div className="mt-8 rounded-2xl border border-[#E1D5E6] bg-[#F8F3FA] p-6">
 
-                <p className="font-medium">
+                <p className="font-semibold text-[#3B174D]">
                   Resumen de tu reserva
                 </p>
 
-                <div className="mt-4 space-y-2 text-sm text-[#675954]">
+                <div className="mt-4 space-y-2 text-sm text-[#5F5761]">
 
                   <p>
                     Servicio:{" "}
-                    {selectedService?.name}
+                    {
+                      selectedService?.name
+                    }
                   </p>
 
                   <p>
                     Duración del masaje:{" "}
-                    {duration} minutos
+                    {
+                      duration
+                    }{" "}
+                    minutos
                   </p>
 
                   <p>
                     Profesional:{" "}
-                    {selectedStaff?.name}
+                    {
+                      selectedStaff?.name
+                    }
                   </p>
 
                   <p className="capitalize">
@@ -1117,12 +1321,17 @@ export default function BookingForm() {
 
                   <p>
                     Hora de inicio:{" "}
-                    {selectedTime}
+                    {
+                      selectedTime
+                    }
                   </p>
 
                   <p>
                     Bloque reservado:{" "}
-                    {selectedTime} -{" "}
+                    {
+                      selectedTime
+                    }{" "}
+                    -{" "}
                     {getEndTime(
                       selectedTime
                     )}
@@ -1131,14 +1340,14 @@ export default function BookingForm() {
                 </div>
 
                 {duration &&
-                  duration < 60 && (
-                    <p className="mt-4 text-xs leading-5 text-[#756762]">
+                  duration <
+                    60 && (
+                    <p className="mt-4 text-xs leading-5 text-[#69636B]">
                       El servicio dura{" "}
-                      {duration} minutos,
-                      pero el horario se reserva
-                      durante una hora completa
-                      para brindar margen entre
-                      sesiones.
+                      {
+                        duration
+                      }{" "}
+                      minutos, pero el horario se reserva durante una hora completa para brindar margen entre sesiones.
                     </p>
                   )}
 
@@ -1153,17 +1362,15 @@ export default function BookingForm() {
                 onClick={
                   createReservation
                 }
-                className="mt-6 w-full rounded-full bg-[#765648] px-7 py-4 font-medium text-white transition hover:bg-[#5f4439] disabled:cursor-not-allowed disabled:opacity-40"
+                className="mt-6 w-full rounded-full bg-[#815799] px-7 py-4 font-semibold text-white transition hover:-translate-y-0.5 hover:bg-[#633A78] hover:shadow-lg disabled:cursor-not-allowed disabled:opacity-40"
               >
                 {saving
                   ? "Guardando reserva..."
                   : "Confirmar reserva"}
               </button>
 
-              <p className="mt-4 text-center text-xs leading-5 text-[#756762]">
-                Al confirmar, tu turno quedará
-                registrado automáticamente en la
-                agenda de Mistica Spa.
+              <p className="mt-4 text-center text-xs leading-5 text-[#69636B]">
+                Al confirmar, tu turno quedará registrado automáticamente en la agenda de Mistica Spa.
               </p>
 
             </div>

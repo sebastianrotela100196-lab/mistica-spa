@@ -1,138 +1,642 @@
 import BookingForm from "@/app/components/BookingForm";
 
-const servicios = [
+type ServiceItem = {
+  nombre: string;
+  descripcion: string;
+};
+
+type ServiceGroup = {
+  categoria: string;
+  color: string;
+  text: string;
+  decoracion: "lily" | "calla" | "lavender" | "olive";
+  items: ServiceItem[];
+};
+
+const servicios: ServiceGroup[] = [
   {
     categoria: "Masajes y terapias",
+    color: "from-[#4A2356] to-[#633A78]",
+    text: "text-white",
+    decoracion: "lily",
     items: [
-      "Masaje terapéutico",
-      "Masaje descontracturante",
-      "Masaje deportivo",
-      "Masaje relajante",
-      "Masaje reductor",
-      "Shiatsu",
-      "Drenaje linfático",
-      "Liberación miofascial craneal",
-      "Terapia para bruxismo y ATM",
+      {
+        nombre: "Masaje terapéutico",
+        descripcion:
+          "Ideal para aliviar tensión muscular, molestias por sobrecarga y recuperar una sensación de bienestar corporal.",
+      },
+      {
+        nombre: "Masaje descontracturante",
+        descripcion:
+          "Trabaja zonas rígidas y contracturadas. Recomendado para espalda, cuello y hombros cargados.",
+      },
+      {
+        nombre: "Masaje relajante",
+        descripcion:
+          "Movimientos suaves que favorecen la relajación, disminuyen la tensión y ayudan a desconectarse del estrés diario.",
+      },
+      {
+        nombre: "Masaje deportivo",
+        descripcion:
+          "Pensado para músculos exigidos por actividad física. Ayuda a reducir tensión y mejorar la sensación de recuperación.",
+      },
+      {
+        nombre: "Masaje reductor",
+        descripcion:
+          "Masaje corporal intenso enfocado en zonas específicas y acompañado de técnicas de modelado.",
+      },
+      {
+        nombre: "Shiatsu",
+        descripcion:
+          "Técnica de presión manual sobre distintos puntos del cuerpo, orientada a generar relajación y equilibrio corporal.",
+      },
+      {
+        nombre: "Drenaje linfático",
+        descripcion:
+          "Técnica suave que favorece el movimiento de líquidos y brinda sensación de ligereza.",
+      },
+      {
+        nombre: "Liberación miofascial craneal",
+        descripcion:
+          "Trabajo suave sobre cabeza, cuello y tejidos asociados, ideal para disminuir sensación de tensión acumulada.",
+      },
+      {
+        nombre: "Terapia para bruxismo y ATM",
+        descripcion:
+          "Trabajo manual en mandíbula, rostro y zonas cercanas para ayudar a relajar la musculatura sometida a tensión.",
+      },
     ],
   },
   {
     categoria: "Tratamientos corporales",
+    color: "from-[#CDB3D9] to-[#E1CFE7]",
+    text: "text-[#3B174D]",
+    decoracion: "calla",
     items: [
-      "Masaje reductor moldeador de cintura de avispa",
-      "Masaje postoperatorio de recuperación",
-      "Tratamiento anticelulítico",
-      "Levantamiento de glúteo",
-      "Baño de luna",
+      {
+        nombre: "Masaje reductor moldeador de cintura de avispa",
+        descripcion:
+          "Técnicas manuales enfocadas en cintura y abdomen para acompañar tratamientos de modelado corporal.",
+      },
+      {
+        nombre: "Masaje postoperatorio de recuperación",
+        descripcion:
+          "Sesión de acompañamiento corporal orientada al bienestar durante procesos de recuperación, según indicación profesional.",
+      },
+      {
+        nombre: "Tratamiento anticelulítico",
+        descripcion:
+          "Combina maniobras corporales enfocadas en mejorar la apariencia y textura de zonas con celulitis.",
+      },
+      {
+        nombre: "Levantamiento de glúteo",
+        descripcion:
+          "Tratamiento corporal enfocado en glúteos mediante técnicas manuales de estimulación y modelado.",
+      },
+      {
+        nombre: "Baño de luna",
+        descripcion:
+          "Tratamiento estético para iluminar la apariencia de la piel y aclarar visualmente el vello corporal.",
+      },
     ],
   },
   {
     categoria: "Faciales",
+    color: "from-[#E9E0EF] to-[#F5EFF7]",
+    text: "text-[#4A2356]",
+    decoracion: "lavender",
     items: [
-      "Limpieza facial express",
-      "Limpieza facial profunda",
+      {
+        nombre: "Limpieza facial express",
+        descripcion:
+          "Opción rápida para limpiar, refrescar y devolver una apariencia más cuidada al rostro.",
+      },
+      {
+        nombre: "Limpieza facial profunda",
+        descripcion:
+          "Limpieza más completa para retirar impurezas y dejar la piel con una sensación fresca y renovada.",
+      },
     ],
   },
   {
     categoria: "Belleza y bienestar",
+    color: "from-[#DDE1CF] to-[#BAC59D]",
+    text: "text-[#39401F]",
+    decoracion: "olive",
     items: [
-      "Sauna seca",
-      "Manicura",
-      "Pedicura",
+      {
+        nombre: "Sauna seca",
+        descripcion:
+          "Una pausa de calor y relajación ideal para descansar, desconectarse y liberar sensación de tensión corporal.",
+      },
+      {
+        nombre: "Manicura",
+        descripcion:
+          "Cuidado de manos y uñas para mantenerlas prolijas, limpias y con una presentación cuidada.",
+      },
+      {
+        nombre: "Pedicura",
+        descripcion:
+          "Cuidado estético de pies y uñas que aporta limpieza, comodidad y una apariencia renovada.",
+      },
     ],
   },
 ];
 
+function LotusIcon() {
+  return (
+    <svg
+      width="38"
+      height="38"
+      viewBox="0 0 48 48"
+      fill="none"
+      aria-hidden="true"
+    >
+      <path
+        d="M24 40C16 35 12 28 13 20C20 22 24 27 24 34"
+        stroke="currentColor"
+        strokeWidth="1.8"
+      />
+      <path
+        d="M24 40C32 35 36 28 35 20C28 22 24 27 24 34"
+        stroke="currentColor"
+        strokeWidth="1.8"
+      />
+      <path
+        d="M24 34C17 27 18 18 24 10C30 18 31 27 24 34Z"
+        stroke="currentColor"
+        strokeWidth="1.8"
+      />
+      <path
+        d="M13 27C8 26 5 23 3 19C10 18 15 20 18 24"
+        stroke="currentColor"
+        strokeWidth="1.8"
+      />
+      <path
+        d="M35 27C40 26 43 23 45 19C38 18 33 20 30 24"
+        stroke="currentColor"
+        strokeWidth="1.8"
+      />
+    </svg>
+  );
+}
+
+/* FLOR GRANDE LILA */
+
+function LilyFlower({
+  className = "",
+}: {
+  className?: string;
+}) {
+  return (
+    <div className={`botanical ${className}`}>
+      <svg
+        width="245"
+        height="270"
+        viewBox="0 0 245 270"
+        fill="none"
+      >
+        <path
+          d="M118 263C115 211 118 169 129 119"
+          stroke="#6D7C3D"
+          strokeWidth="3"
+          strokeLinecap="round"
+        />
+
+        <path
+          d="M123 194C90 177 67 157 56 131"
+          stroke="#6D7C3D"
+          strokeWidth="3"
+        />
+
+        <path
+          d="M126 214C154 190 177 171 188 142"
+          stroke="#6D7C3D"
+          strokeWidth="3"
+        />
+
+        <ellipse
+          cx="59"
+          cy="132"
+          rx="36"
+          ry="12"
+          transform="rotate(34 59 132)"
+          fill="#8DA249"
+          opacity=".95"
+          className="leaf-animated"
+        />
+
+        <ellipse
+          cx="187"
+          cy="141"
+          rx="34"
+          ry="12"
+          transform="rotate(-34 187 141)"
+          fill="#A9B57E"
+          opacity=".9"
+          className="leaf-animated"
+        />
+
+        <g className="flower-bloom">
+          <ellipse
+            cx="129"
+            cy="91"
+            rx="24"
+            ry="50"
+            transform="rotate(-5 129 91)"
+            fill="#F1E9F4"
+          />
+
+          <ellipse
+            cx="101"
+            cy="98"
+            rx="23"
+            ry="46"
+            transform="rotate(-42 101 98)"
+            fill="#A675B6"
+          />
+
+          <ellipse
+            cx="158"
+            cy="98"
+            rx="23"
+            ry="46"
+            transform="rotate(42 158 98)"
+            fill="#754486"
+          />
+
+          <ellipse
+            cx="112"
+            cy="118"
+            rx="20"
+            ry="40"
+            transform="rotate(-23 112 118)"
+            fill="#D8C3E0"
+          />
+
+          <ellipse
+            cx="148"
+            cy="118"
+            rx="20"
+            ry="40"
+            transform="rotate(23 148 118)"
+            fill="#C29BD0"
+          />
+
+          <circle
+            cx="130"
+            cy="111"
+            r="8"
+            fill="#EBCB6A"
+          />
+        </g>
+      </svg>
+    </div>
+  );
+}
+
+/* CALA */
+
+function CallaFlower({
+  className = "",
+}: {
+  className?: string;
+}) {
+  return (
+    <div className={`botanical ${className}`}>
+      <svg
+        width="185"
+        height="250"
+        viewBox="0 0 185 250"
+        fill="none"
+      >
+        <path
+          d="M91 244C91 193 94 146 103 94"
+          stroke="#64752F"
+          strokeWidth="3"
+          strokeLinecap="round"
+        />
+
+        <path
+          d="M98 177C68 161 51 142 40 118"
+          stroke="#64752F"
+          strokeWidth="3"
+        />
+
+        <ellipse
+          cx="42"
+          cy="118"
+          rx="29"
+          ry="10"
+          transform="rotate(37 42 118)"
+          fill="#8DA249"
+          opacity=".9"
+          className="leaf-animated"
+        />
+
+        <g className="flower-bloom">
+          <path
+            d="M103 94C74 76 75 41 106 24C132 45 133 78 103 94Z"
+            fill="#EEE2F2"
+          />
+
+          <path
+            d="M103 93C100 63 111 44 128 36C143 65 130 87 103 93Z"
+            fill="#815799"
+          />
+
+          <ellipse
+            cx="106"
+            cy="75"
+            rx="5"
+            ry="20"
+            fill="#EDCA6A"
+            transform="rotate(7 106 75)"
+          />
+        </g>
+      </svg>
+    </div>
+  );
+}
+
+/* LAVANDA */
+
+function LavenderBranch({
+  className = "",
+}: {
+  className?: string;
+}) {
+  return (
+    <div className={`botanical ${className}`}>
+      <svg
+        width="150"
+        height="245"
+        viewBox="0 0 150 245"
+        fill="none"
+      >
+        <path
+          d="M62 239C69 189 79 132 87 47"
+          stroke="#66753E"
+          strokeWidth="3"
+        />
+
+        {[61, 84, 107, 130, 153].map(
+          (y, index) => (
+            <g
+              key={y}
+              className="lavender-petal"
+              style={{
+                animationDelay: `${index * 0.18}s`,
+              }}
+            >
+              <ellipse
+                cx={76}
+                cy={y}
+                rx="14"
+                ry="24"
+                transform={`rotate(-36 76 ${y})`}
+                fill={
+                  index % 2 === 0
+                    ? "#815799"
+                    : "#CDB3D9"
+                }
+              />
+
+              <ellipse
+                cx={99}
+                cy={y + 5}
+                rx="12"
+                ry="21"
+                transform={`rotate(36 99 ${
+                  y + 5
+                })`}
+                fill="#633A78"
+              />
+            </g>
+          )
+        )}
+      </svg>
+    </div>
+  );
+}
+
+/* RAMA VERDE */
+
+function OliveBranch({
+  className = "",
+}: {
+  className?: string;
+}) {
+  const leaves = [
+    [73, 193, -38],
+    [101, 172, 32],
+    [85, 150, -38],
+    [113, 128, 32],
+    [97, 105, -35],
+    [126, 83, 32],
+    [114, 59, -28],
+  ];
+
+  return (
+    <div className={`botanical ${className}`}>
+      <svg
+        width="155"
+        height="230"
+        viewBox="0 0 155 230"
+        fill="none"
+      >
+        <path
+          d="M59 223C80 178 103 130 132 37"
+          stroke="#64752F"
+          strokeWidth="3"
+        />
+
+        {leaves.map(
+          ([x, y, rotate], index) => (
+            <ellipse
+              key={index}
+              cx={x}
+              cy={y}
+              rx="25"
+              ry="9"
+              transform={`rotate(${rotate} ${x} ${y})`}
+              fill={
+                index % 2 === 0
+                  ? "#879D49"
+                  : "#A7B38A"
+              }
+              opacity=".93"
+              className="leaf-animated"
+            />
+          )
+        )}
+      </svg>
+    </div>
+  );
+}
+
+/* PETALOS */
+
+function PetalCluster({
+  className = "",
+}: {
+  className?: string;
+}) {
+  return (
+    <div
+      className={`botanical h-32 w-32 ${className}`}
+    >
+      <span className="petal petal-1" />
+      <span className="petal petal-2" />
+      <span className="petal petal-3" />
+    </div>
+  );
+}
+
+function Decoration({
+  type,
+}: {
+  type:
+    | "lily"
+    | "calla"
+    | "lavender"
+    | "olive";
+}) {
+  if (type === "lily") {
+    return (
+      <LilyFlower className="bottom-[-22px] right-[2%] z-[1] scale-[0.92] opacity-95" />
+    );
+  }
+
+  if (type === "calla") {
+    return (
+      <CallaFlower className="bottom-[-18px] right-[4%] z-[1] scale-[0.9] opacity-95" />
+    );
+  }
+
+  if (type === "lavender") {
+    return (
+      <LavenderBranch className="bottom-[-14px] right-[4%] z-[1] scale-[0.9] opacity-90" />
+    );
+  }
+
+  return (
+    <OliveBranch className="bottom-[-15px] right-[4%] z-[1] scale-[0.95] opacity-95" />
+  );
+}
+
 export default function Home() {
   return (
-    <main className="min-h-screen bg-[#f8f4ef] text-[#332a27]">
+    <main className="min-h-screen overflow-hidden bg-[#F7F4EE] text-[#2E2830]">
 
       {/* HEADER */}
-      <header className="sticky top-0 z-50 border-b border-[#dfd2c7] bg-[#f8f4ef]/95 backdrop-blur">
+
+      <header className="sticky top-0 z-50 border-b border-[#E6E0D8] bg-[#F7F4EE]/95 backdrop-blur-xl">
+
         <div className="mx-auto flex max-w-7xl items-center justify-between px-6 py-4">
 
           <a
             href="#inicio"
-            className="text-2xl font-semibold tracking-[0.18em]"
+            className="flex items-center gap-3 text-[#3D4036]"
           >
-            MISTICA
-            <span className="ml-2 text-sm font-normal tracking-[0.3em] text-[#9c7968]">
+            <span className="hidden text-[#633A78] sm:block">
+              <LotusIcon />
+            </span>
+
+            <span className="font-display text-3xl font-semibold tracking-[0.17em]">
+              MISTICA
+            </span>
+
+            <span className="text-xs font-semibold tracking-[0.35em] text-[#6F8F7A]">
               SPA
             </span>
           </a>
 
-          <nav className="hidden gap-8 text-sm md:flex">
+          <nav className="hidden gap-9 text-sm font-medium text-[#4E504B] md:flex">
+
             <a
               href="#inicio"
-              className="transition hover:text-[#9c7968]"
+              className="transition hover:text-[#815799]"
             >
               Inicio
             </a>
 
             <a
               href="#servicios"
-              className="transition hover:text-[#9c7968]"
+              className="transition hover:text-[#815799]"
             >
               Servicios
             </a>
 
             <a
               href="#horarios"
-              className="transition hover:text-[#9c7968]"
+              className="transition hover:text-[#815799]"
             >
               Horarios
             </a>
 
             <a
               href="#contacto"
-              className="transition hover:text-[#9c7968]"
+              className="transition hover:text-[#815799]"
             >
               Contacto
             </a>
+
           </nav>
 
           <a
             href="#reservar"
-            className="rounded-full bg-[#765648] px-5 py-3 text-sm font-medium text-white transition hover:bg-[#5f4439]"
+            className="lux-button rounded-full bg-[#2F7057] px-6 py-3 text-sm font-semibold text-white hover:bg-[#255B47]"
           >
             Reservar turno
           </a>
 
         </div>
+
       </header>
 
-      {/* INICIO */}
+      {/* HERO */}
+
       <section
         id="inicio"
-        className="relative overflow-hidden px-6 py-24 md:py-36"
+        className="relative overflow-hidden px-6 py-20 md:py-28"
       >
-        <div className="absolute -right-32 -top-32 h-96 w-96 rounded-full bg-[#e8d7cc] blur-3xl" />
-        <div className="absolute -bottom-48 -left-20 h-96 w-96 rounded-full bg-[#ded8c8] blur-3xl" />
 
-        <div className="relative mx-auto grid max-w-7xl items-center gap-16 md:grid-cols-2">
+        <OliveBranch className="-left-9 -top-12 rotate-[18deg] scale-[0.8] opacity-70" />
 
-          <div>
-            <p className="mb-5 text-sm uppercase tracking-[0.35em] text-[#9c7968]">
+        <LavenderBranch className="-right-6 top-8 scale-[0.8] opacity-60" />
+
+        <PetalCluster className="right-[18%] top-[12%]" />
+
+        <div className="relative z-10 mx-auto grid max-w-7xl items-center gap-12 md:grid-cols-2">
+
+          <div className="animate-fade-left">
+
+            <p className="mb-5 text-xs font-semibold uppercase tracking-[0.4em] text-[#633A78]">
               Bienestar · Belleza · Relajación
             </p>
 
-            <h1 className="max-w-xl text-5xl font-light leading-tight md:text-7xl">
+            <h1 className="font-display text-6xl font-semibold leading-[0.94] text-[#2F2930] md:text-8xl">
+
               Tu momento de
-              <span className="block font-medium italic text-[#765648]">
+
+              <span className="block italic text-[#815799]">
                 bienestar
               </span>
+
               comienza aquí.
+
             </h1>
 
-            <p className="mt-7 max-w-lg text-lg leading-8 text-[#756762]">
-              Un espacio dedicado al cuidado personal, la relajación y
-              tratamientos pensados para ayudarte a sentirte mejor.
+            <p className="mt-7 max-w-lg text-base font-medium leading-7 text-[#656168]">
+              Un espacio dedicado al cuidado personal, la relajación y tratamientos pensados para ayudarte a sentirte mejor.
             </p>
 
-            <div className="mt-10 flex flex-wrap gap-4">
+            <div className="mt-9 flex flex-wrap gap-4">
 
               <a
                 href="#reservar"
-                className="rounded-full bg-[#765648] px-7 py-4 font-medium text-white transition hover:bg-[#5f4439]"
+                className="lux-button rounded-full bg-[#815799] px-7 py-4 font-semibold text-white hover:bg-[#633A78]"
               >
                 Reservar mi turno
               </a>
@@ -141,132 +645,190 @@ export default function Home() {
                 href="https://wa.me/595981490443"
                 target="_blank"
                 rel="noopener noreferrer"
-                className="rounded-full border border-[#765648] px-7 py-4 font-medium text-[#765648] transition hover:bg-[#765648] hover:text-white"
+                className="lux-button rounded-full border-2 border-[#815799] bg-white/70 px-7 py-4 font-semibold text-[#4A2356] hover:bg-[#4A2356] hover:text-white"
               >
                 WhatsApp
               </a>
 
             </div>
+
           </div>
 
-          <div className="relative mx-auto flex h-[450px] w-full max-w-md items-center justify-center rounded-[4rem_1rem_4rem_1rem] bg-[#d8c3b7] shadow-2xl">
+          <div className="animate-fade-right">
 
-            <div className="absolute inset-5 rounded-[3.4rem_0.8rem_3.4rem_0.8rem] border border-white/50" />
+            <div className="relative mx-auto flex min-h-[440px] max-w-lg items-center justify-center overflow-hidden rounded-[4rem_1rem_4rem_1rem] bg-gradient-to-br from-[#DCC9E3] via-[#EFE5F2] to-[#DDE1CF] shadow-[0_28px_70px_rgba(74,35,86,0.18)]">
 
-            <div className="text-center text-[#654a40]">
+              <LilyFlower className="-bottom-16 -right-3 z-[1] scale-[1.05]" />
 
-              <p className="text-sm uppercase tracking-[0.4em]">
-                Mistica
-              </p>
+              <CallaFlower className="-left-8 -top-24 z-[1] rotate-180 scale-[0.8] opacity-70" />
 
-              <p className="mt-3 text-6xl font-light">
-                SPA
-              </p>
+              <div className="absolute inset-5 rounded-[3.4rem_.7rem_3.4rem_.7rem] border border-white/70" />
 
-              <div className="mx-auto my-7 h-px w-20 bg-[#765648]" />
+              <div className="relative z-10 text-center text-[#4A2356]">
 
-              <p className="text-sm tracking-widest">
-                RELÁJATE · RENUEVA · DISFRUTA
-              </p>
+                <div className="mx-auto mb-4 flex justify-center">
+                  <LotusIcon />
+                </div>
+
+                <p className="text-xs uppercase tracking-[0.5em]">
+                  Mistica
+                </p>
+
+                <p className="mt-3 font-display text-7xl font-semibold">
+                  SPA
+                </p>
+
+                <div className="mx-auto my-6 h-px w-20 bg-[#815799]" />
+
+                <p className="text-xs font-semibold tracking-[0.25em]">
+                  RELÁJATE · RENUEVA · DISFRUTA
+                </p>
+
+              </div>
 
             </div>
+
           </div>
 
         </div>
+
       </section>
 
       {/* SERVICIOS */}
+
       <section
         id="servicios"
-        className="bg-white px-6 py-24"
+        className="relative bg-[#FCFAF6] px-6 py-24"
       >
+
         <div className="mx-auto max-w-7xl">
 
-          <div className="mx-auto mb-14 max-w-2xl text-center">
+          <div className="reveal mx-auto mb-14 max-w-2xl text-center">
 
-            <p className="text-sm uppercase tracking-[0.35em] text-[#9c7968]">
+            <p className="text-xs font-semibold uppercase tracking-[0.4em] text-[#815799]">
               Nuestros servicios
             </p>
 
-            <h2 className="mt-4 text-4xl font-light md:text-5xl">
+            <h2 className="mt-4 font-display text-5xl font-semibold text-[#3B174D] md:text-6xl">
               Encuentra el tratamiento ideal para ti
             </h2>
 
-            <p className="mt-5 leading-7 text-[#756762]">
-              Puedes elegir sesiones de 30, 45 o 60 minutos según el servicio.
+            <p className="mt-4 text-sm font-medium text-[#69636B]">
+              Lee qué puede aportarte cada tratamiento y elige el que mejor se adapte a lo que estás buscando.
             </p>
 
           </div>
 
           <div className="grid gap-6 md:grid-cols-2">
 
-            {servicios.map((grupo) => (
-              <article
-                key={grupo.categoria}
-                className="rounded-3xl border border-[#eadfd7] bg-[#fbf8f5] p-8 transition hover:-translate-y-1 hover:shadow-xl"
-              >
+            {servicios.map(
+              (grupo) => (
 
-                <h3 className="mb-6 text-2xl font-medium text-[#765648]">
-                  {grupo.categoria}
-                </h3>
+                <article
+                  key={grupo.categoria}
+                  className={`lux-card reveal relative overflow-hidden rounded-[1.8rem] bg-gradient-to-br ${grupo.color} p-7 ${grupo.text}`}
+                >
 
-                <div className="space-y-4">
+                  {/* La planta tiene su propia zona.
+                      No queda debajo de los botones. */}
 
-                  {grupo.items.map((servicio) => (
-                    <div
-                      key={servicio}
-                      className="flex items-center justify-between border-b border-[#eadfd7] pb-4"
-                    >
+                  <Decoration
+                    type={grupo.decoracion}
+                  />
 
-                      <span>
-                        {servicio}
-                      </span>
+                  <div className="relative z-10 pr-0 lg:pr-[150px]">
 
-                      <a
-                        href="#reservar"
-                        className="ml-5 whitespace-nowrap text-sm font-medium text-[#9c7968] hover:text-[#765648]"
-                      >
-                        Reservar
-                      </a>
+                    <div className="mb-6 flex items-center gap-3">
+
+                      <div className="flex h-11 w-11 shrink-0 items-center justify-center rounded-full border border-current/30 bg-white/15">
+                        <LotusIcon />
+                      </div>
+
+                      <h3 className="font-display text-3xl font-semibold">
+                        {grupo.categoria}
+                      </h3>
 
                     </div>
-                  ))}
 
-                </div>
+                    <div className="space-y-5">
 
-              </article>
-            ))}
+                      {grupo.items.map(
+                        (servicio) => (
+
+                          <div
+                            key={servicio.nombre}
+                            className="max-w-[100%] border-b border-current/15 pb-4 lg:max-w-[92%]"
+                          >
+
+                            <div className="flex flex-col gap-2">
+
+                              <p className="text-sm font-semibold">
+                                {servicio.nombre}
+                              </p>
+
+                              <p className="max-w-lg text-xs leading-5 opacity-80">
+                                {servicio.descripcion}
+                              </p>
+
+                              <a
+                                href="#reservar"
+                                className="mt-1 w-fit text-xs font-semibold underline decoration-current/30 underline-offset-4 transition hover:translate-x-1"
+                              >
+                                Reservar →
+                              </a>
+
+                            </div>
+
+                          </div>
+
+                        )
+                      )}
+
+                    </div>
+
+                  </div>
+
+                </article>
+
+              )
+            )}
 
           </div>
 
         </div>
+
       </section>
 
       {/* HORARIOS */}
+
       <section
         id="horarios"
-        className="px-6 py-24"
+        className="relative px-6 py-24"
       >
-        <div className="mx-auto grid max-w-6xl gap-12 rounded-[2.5rem] bg-[#765648] px-8 py-14 text-white md:grid-cols-2 md:px-16">
 
-          <div>
+        <div className="reveal relative mx-auto grid max-w-6xl items-center gap-10 overflow-hidden rounded-[3rem] bg-gradient-to-r from-[#3B174D] via-[#4A2356] to-[#633A78] px-8 py-14 text-white shadow-2xl md:grid-cols-2 md:px-14">
 
-            <p className="text-sm uppercase tracking-[0.35em] text-[#e8d7cc]">
+          <LilyFlower className="-bottom-20 -left-9 z-[1] scale-[0.72] opacity-85" />
+
+          <CallaFlower className="-bottom-20 -right-7 z-[1] scale-[0.74] opacity-85" />
+
+          <div className="relative z-10">
+
+            <p className="text-xs font-semibold uppercase tracking-[0.4em] text-[#E7DDEF]">
               Horarios
             </p>
 
-            <h2 className="mt-4 text-4xl font-light">
+            <h2 className="mt-4 font-display text-5xl font-semibold">
               Reserva el momento que mejor se adapte a ti
             </h2>
 
-            <p className="mt-5 max-w-lg leading-7 text-[#eadfd7]">
-              Nuestro calendario mostrará los días y horarios disponibles
-              para que puedas elegir tu turno.
+            <p className="mt-5 max-w-lg text-sm leading-6 text-[#E8DCEB]">
+              Nuestro calendario mostrará los días y horarios disponibles para que puedas elegir tu turno.
             </p>
 
           </div>
 
-          <div className="flex flex-col justify-center rounded-3xl bg-white/10 p-8 backdrop-blur">
+          <div className="relative z-10 rounded-[1.8rem] border border-white/20 bg-white/10 p-7 backdrop-blur">
 
             <div className="flex justify-between border-b border-white/20 py-4">
               <span>
@@ -291,85 +853,161 @@ export default function Home() {
           </div>
 
         </div>
+
       </section>
 
-      {/* FORMULARIO REAL DE RESERVAS */}
+      {/* RESERVAS */}
+
       <BookingForm />
 
       {/* CONTACTO */}
+
       <section
         id="contacto"
-        className="bg-white px-6 py-24"
+        className="relative overflow-hidden bg-[#FCFAF6] px-6 py-24"
       >
-        <div className="mx-auto max-w-6xl">
 
-          <div className="grid gap-12 md:grid-cols-2">
+        <LavenderBranch className="-bottom-20 -right-4 scale-[0.95] opacity-75" />
 
-            <div>
+        <OliveBranch className="-bottom-24 -left-8 scale-[0.8] opacity-50" />
 
-              <p className="text-sm uppercase tracking-[0.35em] text-[#9c7968]">
-                Contacto
+        <div className="relative z-10 mx-auto grid max-w-6xl gap-8 md:grid-cols-2">
+
+          <div className="reveal">
+
+            <p className="text-xs font-semibold uppercase tracking-[0.4em] text-[#815799]">
+              Contacto
+            </p>
+
+            <h2 className="mt-3 font-display text-5xl font-semibold text-[#3B174D]">
+              Mistica Spa
+            </h2>
+
+            <div className="mt-7 space-y-3 text-sm font-medium text-[#69636B]">
+
+              <p>
+                Quirino Codas Thompson, San Lorenzo
               </p>
 
-              <h2 className="mt-4 text-4xl font-light">
-                Mistica Spa
-              </h2>
+              <p>
+                0981 490443
+              </p>
 
-              <div className="mt-8 space-y-4 text-[#675954]">
-
-                <p>
-                  Quirino Codas Thompson, San Lorenzo
-                </p>
-
-                <p>
-                  0981 490443
-                </p>
-
-                <p>
-                  Lunes a sábado · 08:00 a 20:00
-                </p>
-
-              </div>
-
-              <div className="mt-9 flex flex-wrap gap-4">
-
-                <a
-                  href="https://wa.me/595981490443"
-                  target="_blank"
-                  rel="noopener noreferrer"
-                  className="rounded-full bg-[#765648] px-6 py-3 text-white transition hover:bg-[#5f4439]"
-                >
-                  Escribir por WhatsApp
-                </a>
-
-                <a
-                  href="https://g.page/r/CYShAR7rfMcqEBM/review"
-                  target="_blank"
-                  rel="noopener noreferrer"
-                  className="rounded-full border border-[#765648] px-6 py-3 text-[#765648] transition hover:bg-[#765648] hover:text-white"
-                >
-                  Dejar una reseña
-                </a>
-
-              </div>
+              <p>
+                Lunes a sábado · 08:00 a 20:00
+              </p>
 
             </div>
 
-            <div className="rounded-3xl bg-[#f8f4ef] p-10">
+            <div className="mt-8 flex flex-wrap gap-3">
 
-              <p className="text-sm uppercase tracking-[0.3em] text-[#9c7968]">
-                Google
+              <a
+                href="https://wa.me/595981490443"
+                target="_blank"
+                rel="noopener noreferrer"
+                className="lux-button rounded-full bg-[#6F9140] px-5 py-3 text-sm font-semibold text-white hover:bg-[#5E7C35]"
+              >
+                WhatsApp
+              </a>
+
+              <a
+                href="https://g.page/r/CYShAR7rfMcqEBM/review"
+                target="_blank"
+                rel="noopener noreferrer"
+                className="lux-button rounded-full border border-[#D7D1C9] bg-white px-5 py-3 text-sm font-semibold"
+              >
+                <span className="google-g">
+
+                  <span className="google-blue">
+                    G
+                  </span>
+
+                  <span className="google-red">
+                    o
+                  </span>
+
+                  <span className="google-yellow">
+                    o
+                  </span>
+
+                  <span className="google-blue">
+                    g
+                  </span>
+
+                  <span className="google-green">
+                    l
+                  </span>
+
+                  <span className="google-red">
+                    e
+                  </span>
+
+                </span>{" "}
+                · Dejar una reseña
+              </a>
+
+              <a
+                href="https://www.instagram.com/mistica_spa53/"
+                target="_blank"
+                rel="noopener noreferrer"
+                className="lux-button rounded-full border-2 border-[#B05E9E] bg-white px-5 py-3 text-sm font-semibold text-[#8E3D82] hover:bg-[#B05E9E] hover:text-white"
+              >
+                Instagram
+              </a>
+
+            </div>
+
+          </div>
+
+          {/* GOOGLE */}
+
+          <div className="lux-card reveal relative overflow-hidden rounded-[2rem] border border-[#E1D9E4] bg-gradient-to-br from-white to-[#F1EAF4] p-9">
+
+            <CallaFlower className="-bottom-24 -right-3 z-[1] scale-[0.7] opacity-75" />
+
+            <div className="relative z-10">
+
+              <p className="google-g text-lg">
+
+                <span className="google-blue">
+                  G
+                </span>
+
+                <span className="google-red">
+                  o
+                </span>
+
+                <span className="google-yellow">
+                  o
+                </span>
+
+                <span className="google-blue">
+                  g
+                </span>
+
+                <span className="google-green">
+                  l
+                </span>
+
+                <span className="google-red">
+                  e
+                </span>
+
               </p>
 
-              <p className="mt-5 text-5xl font-light">
-                4.9
-              </p>
+              <div className="mt-3 flex items-center gap-4">
 
-              <p className="mt-2 text-xl tracking-widest text-[#9c7968]">
-                ★★★★★
-              </p>
+                <p className="font-display text-6xl font-semibold text-[#633A78]">
+                  4.9
+                </p>
 
-              <p className="mt-4 text-[#756762]">
+                <p className="tracking-[0.18em] text-[#F4B400]">
+                  ★★★★★
+                </p>
+
+              </div>
+
+              <p className="mt-3 text-sm font-medium text-[#69636B]">
                 Valoración actual de Mistica Spa en Google.
               </p>
 
@@ -377,9 +1015,9 @@ export default function Home() {
                 href="https://g.page/r/CYShAR7rfMcqEBM/review"
                 target="_blank"
                 rel="noopener noreferrer"
-                className="mt-7 inline-block font-medium text-[#765648] underline underline-offset-4"
+                className="mt-6 inline-block text-sm font-semibold text-[#633A78] underline underline-offset-4"
               >
-                Compartir mi experiencia
+                Compartir mi experiencia →
               </a>
 
             </div>
@@ -387,18 +1025,56 @@ export default function Home() {
           </div>
 
         </div>
+
       </section>
 
       {/* FOOTER */}
-      <footer className="bg-[#332a27] px-6 py-10 text-center text-sm text-[#d6c7bf]">
 
-        <p className="text-lg tracking-[0.25em] text-white">
-          MISTICA SPA
-        </p>
+      <footer className="relative overflow-hidden bg-gradient-to-r from-[#3B174D] to-[#633A78] px-6 py-10 text-white">
 
-        <p className="mt-3">
-          Bienestar y cuidado personal
-        </p>
+        <div className="mx-auto flex max-w-7xl flex-col items-center justify-between gap-5 md:flex-row">
+
+          <div className="flex items-center gap-3">
+
+            <LotusIcon />
+
+            <span className="font-display text-2xl font-semibold tracking-[0.22em]">
+              MISTICA
+            </span>
+
+            <span className="text-xs tracking-[0.3em]">
+              SPA
+            </span>
+
+          </div>
+
+          <p className="text-sm text-white/75">
+            Bienestar y cuidado personal
+          </p>
+
+          <div className="flex items-center gap-3">
+
+            <a
+              href="https://wa.me/595981490443"
+              target="_blank"
+              rel="noopener noreferrer"
+              className="lux-button rounded-full border border-white/40 px-4 py-2 text-sm"
+            >
+              WhatsApp
+            </a>
+
+            <a
+              href="https://www.instagram.com/mistica_spa53/"
+              target="_blank"
+              rel="noopener noreferrer"
+              className="lux-button rounded-full border border-white/40 px-4 py-2 text-sm"
+            >
+              Instagram
+            </a>
+
+          </div>
+
+        </div>
 
       </footer>
 

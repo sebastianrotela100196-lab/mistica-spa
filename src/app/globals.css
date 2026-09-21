@@ -1,26 +1,492 @@
 @import "tailwindcss";
 
 :root {
-  --background: #ffffff;
-  --foreground: #171717;
+  --cream: #f7f4ee;
+  --cream-soft: #fcfaf6;
+
+  --purple: #815799;
+  --purple-dark: #4a2356;
+  --purple-deep: #3b174d;
+  --purple-soft: #cdb3d9;
+  --lavender: #e7ddef;
+  --lavender-light: #f4eef7;
+
+  --olive: #8da249;
+  --olive-dark: #64752f;
+  --sage: #a7b49b;
+
+  --sand: #d3c6bb;
+  --warm-gray: #b5b0a8;
+
+  --text: #2e2830;
+  --muted: #69636b;
+
+  --white: #ffffff;
 }
 
-@theme inline {
-  --color-background: var(--background);
-  --color-foreground: var(--foreground);
-  --font-sans: var(--font-geist-sans);
-  --font-mono: var(--font-geist-mono);
-}
-
-@media (prefers-color-scheme: dark) {
-  :root {
-    --background: #0a0a0a;
-    --foreground: #ededed;
-  }
+html {
+  scroll-behavior: smooth;
 }
 
 body {
-  background: var(--background);
-  color: var(--foreground);
-  font-family: Arial, Helvetica, sans-serif;
+  margin: 0;
+  background: var(--cream);
+  color: var(--text);
+  font-family: var(--font-montserrat), Arial, Helvetica, sans-serif;
+  overflow-x: hidden;
+}
+
+h1,
+h2,
+h3,
+.font-display {
+  font-family: var(--font-cormorant), Georgia, serif;
+}
+
+::selection {
+  background: var(--purple-soft);
+  color: var(--purple-deep);
+}
+
+/* =========================
+   ANIMACIONES GENERALES
+========================= */
+
+@keyframes fadeUp {
+  from {
+    opacity: 0;
+    transform: translateY(32px);
+  }
+
+  to {
+    opacity: 1;
+    transform: translateY(0);
+  }
+}
+
+@keyframes fadeLeft {
+  from {
+    opacity: 0;
+    transform: translateX(-28px);
+  }
+
+  to {
+    opacity: 1;
+    transform: translateX(0);
+  }
+}
+
+@keyframes fadeRight {
+  from {
+    opacity: 0;
+    transform: translateX(28px);
+  }
+
+  to {
+    opacity: 1;
+    transform: translateX(0);
+  }
+}
+
+@keyframes flowerGrow {
+  0% {
+    opacity: 0;
+    transform: scale(0.45) rotate(-12deg);
+  }
+
+  70% {
+    transform: scale(1.08) rotate(2deg);
+  }
+
+  100% {
+    opacity: 1;
+    transform: scale(1) rotate(0deg);
+  }
+}
+
+@keyframes flowerFloat {
+  0%,
+  100% {
+    transform: translateY(0) rotate(0deg);
+  }
+
+  50% {
+    transform: translateY(-12px) rotate(3deg);
+  }
+}
+
+@keyframes leafSway {
+  0%,
+  100% {
+    transform: rotate(-2deg);
+  }
+
+  50% {
+    transform: rotate(5deg);
+  }
+}
+
+@keyframes softPulse {
+  0%,
+  100% {
+    transform: scale(1);
+  }
+
+  50% {
+    transform: scale(1.04);
+  }
+}
+
+@keyframes shimmer {
+  0% {
+    transform: translateX(-130%);
+  }
+
+  100% {
+    transform: translateX(170%);
+  }
+}
+
+.animate-fade-up {
+  animation: fadeUp 0.9s ease both;
+}
+
+.animate-fade-left {
+  animation: fadeLeft 0.9s ease both;
+}
+
+.animate-fade-right {
+  animation: fadeRight 0.9s ease both;
+}
+
+.flower-grow {
+  animation:
+    flowerGrow 1.15s ease-out both,
+    flowerFloat 7s ease-in-out 1.15s infinite;
+  transform-origin: center;
+}
+
+.flower-grow-delay {
+  animation:
+    flowerGrow 1.25s ease-out 0.4s both,
+    flowerFloat 8s ease-in-out 1.6s infinite;
+  transform-origin: center;
+}
+
+.leaf-sway {
+  animation: leafSway 5s ease-in-out infinite;
+  transform-origin: bottom center;
+}
+
+.reveal {
+  opacity: 0;
+  transform: translateY(30px);
+}
+
+@supports (animation-timeline: view()) {
+  .reveal {
+    animation: fadeUp linear both;
+    animation-timeline: view();
+    animation-range: entry 8% cover 28%;
+  }
+}
+
+@supports not (animation-timeline: view()) {
+  .reveal {
+    opacity: 1;
+    transform: none;
+  }
+}
+
+/* =========================
+   BOTONES
+========================= */
+
+.lux-button {
+  position: relative;
+  overflow: hidden;
+  transition:
+    transform 0.25s ease,
+    box-shadow 0.25s ease,
+    background-color 0.25s ease,
+    color 0.25s ease;
+}
+
+.lux-button:hover {
+  transform: translateY(-3px);
+  box-shadow: 0 14px 30px rgba(74, 35, 86, 0.18);
+}
+
+.lux-button::after {
+  content: "";
+  position: absolute;
+  top: 0;
+  left: -50%;
+  width: 35%;
+  height: 100%;
+  background: linear-gradient(
+    90deg,
+    transparent,
+    rgba(255, 255, 255, 0.35),
+    transparent
+  );
+  transform: skewX(-20deg);
+}
+
+.lux-button:hover::after {
+  animation: shimmer 0.75s ease;
+}
+
+/* =========================
+   TARJETAS
+========================= */
+
+.lux-card {
+  transition:
+    transform 0.35s ease,
+    box-shadow 0.35s ease;
+}
+
+.lux-card:hover {
+  transform: translateY(-7px);
+  box-shadow: 0 24px 50px rgba(74, 35, 86, 0.12);
+}
+
+/* =========================
+   BOTÁNICA
+========================= */
+
+.botanical {
+  pointer-events: none;
+  position: absolute;
+  z-index: 1;
+}
+
+.botanical svg {
+  overflow: visible;
+}
+
+/* =========================
+   GOOGLE
+========================= */
+
+.google-g {
+  font-weight: 700;
+  letter-spacing: -0.03em;
+}
+
+.google-blue {
+  color: #4285f4;
+}
+
+.google-red {
+  color: #ea4335;
+}
+
+.google-yellow {
+  color: #fbbc05;
+}
+
+.google-green {
+  color: #34a853;
+}
+
+/* =========================
+   BOOKING FORM
+   Recolorea el formulario
+   sin modificar su lógica
+========================= */
+
+#reservar {
+  background:
+    radial-gradient(circle at 10% 10%, rgba(205, 179, 217, 0.35), transparent 30%),
+    radial-gradient(circle at 90% 80%, rgba(141, 162, 73, 0.15), transparent 30%),
+    var(--lavender-light) !important;
+}
+
+#reservar h1,
+#reservar h2,
+#reservar h3 {
+  color: var(--purple-deep);
+}
+
+#reservar p {
+  color: var(--muted);
+}
+
+#reservar button {
+  transition:
+    transform 0.25s ease,
+    box-shadow 0.25s ease,
+    background-color 0.25s ease;
+}
+
+#reservar button:hover {
+  transform: translateY(-2px);
+}
+
+#reservar input,
+#reservar select,
+#reservar textarea {
+  border-color: #d8c9dd !important;
+}
+
+#reservar input:focus,
+#reservar select:focus,
+#reservar textarea:focus {
+  outline: none;
+  border-color: var(--purple) !important;
+  box-shadow: 0 0 0 3px rgba(129, 87, 153, 0.12);
+}
+
+/* =========================
+   ACCESIBILIDAD
+========================= */
+
+@media (prefers-reduced-motion: reduce) {
+  *,
+  *::before,
+  *::after {
+    animation-duration: 0.01ms !important;
+    animation-iteration-count: 1 !important;
+    transition-duration: 0.01ms !important;
+  }
+
+  .reveal {
+    opacity: 1;
+    transform: none;
+  }
+}
+/* =========================================
+   BOTÁNICA MISTICA SPA
+========================================= */
+
+.botanical {
+  pointer-events: none;
+  position: absolute;
+}
+
+@keyframes misticaBloom {
+  0% {
+    opacity: 0;
+    transform: scale(0.25) rotate(-10deg);
+  }
+
+  65% {
+    opacity: 1;
+    transform: scale(1.08) rotate(2deg);
+  }
+
+  100% {
+    opacity: 1;
+    transform: scale(1) rotate(0deg);
+  }
+}
+
+@keyframes misticaFlowerFloat {
+  0%,
+  100% {
+    transform: translateY(0) rotate(0deg);
+  }
+
+  50% {
+    transform: translateY(-9px) rotate(2deg);
+  }
+}
+
+@keyframes misticaLeaf {
+  0%,
+  100% {
+    opacity: 0.82;
+  }
+
+  50% {
+    opacity: 1;
+  }
+}
+
+@keyframes misticaLavender {
+  0% {
+    opacity: 0;
+    transform: scale(0.35);
+  }
+
+  70% {
+    transform: scale(1.08);
+  }
+
+  100% {
+    opacity: 1;
+    transform: scale(1);
+  }
+}
+
+@keyframes misticaPetalFall {
+  0% {
+    opacity: 0;
+    transform:
+      translateY(-15px)
+      translateX(0)
+      rotate(0deg);
+  }
+
+  20% {
+    opacity: 0.75;
+  }
+
+  100% {
+    opacity: 0;
+    transform:
+      translateY(90px)
+      translateX(-28px)
+      rotate(150deg);
+  }
+}
+
+.flower-bloom {
+  transform-origin: center;
+  animation:
+    misticaBloom 1.25s ease-out both,
+    misticaFlowerFloat 6s ease-in-out 1.25s infinite;
+}
+
+.leaf-animated {
+  animation:
+    misticaLeaf 4s ease-in-out infinite;
+}
+
+.lavender-petal {
+  transform-origin: center;
+  animation:
+    misticaLavender 0.9s ease-out both;
+}
+
+.petal {
+  position: absolute;
+  width: 18px;
+  height: 29px;
+  border-radius: 80% 20% 80% 20%;
+  opacity: 0;
+  animation:
+    misticaPetalFall 6s ease-in-out infinite;
+}
+
+.petal-1 {
+  left: 5px;
+  top: 0;
+  background: #815799;
+}
+
+.petal-2 {
+  left: 45px;
+  top: 18px;
+  background: #cdb3d9;
+  animation-delay: 2s;
+}
+
+.petal-3 {
+  left: 80px;
+  top: -8px;
+  background: #633a78;
+  animation-delay: 4s;
 }
