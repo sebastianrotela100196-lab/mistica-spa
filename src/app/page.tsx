@@ -181,34 +181,21 @@ function LotusIcon() {
   );
 }
 
-/* FLOR GRANDE LILA */
-
-function LilyFlower({
-  className = "",
-}: {
-  className?: string;
-}) {
+function LilyFlower({ className = "" }: { className?: string }) {
   return (
     <div className={`botanical ${className}`}>
-      <svg
-        width="245"
-        height="270"
-        viewBox="0 0 245 270"
-        fill="none"
-      >
+      <svg width="245" height="270" viewBox="0 0 245 270" fill="none">
         <path
           d="M118 263C115 211 118 169 129 119"
           stroke="#6D7C3D"
           strokeWidth="3"
           strokeLinecap="round"
         />
-
         <path
           d="M123 194C90 177 67 157 56 131"
           stroke="#6D7C3D"
           strokeWidth="3"
         />
-
         <path
           d="M126 214C154 190 177 171 188 142"
           stroke="#6D7C3D"
@@ -246,7 +233,6 @@ function LilyFlower({
             transform="rotate(-5 129 91)"
             fill="#F1E9F4"
           />
-
           <ellipse
             cx="101"
             cy="98"
@@ -255,7 +241,6 @@ function LilyFlower({
             transform="rotate(-42 101 98)"
             fill="#A675B6"
           />
-
           <ellipse
             cx="158"
             cy="98"
@@ -264,7 +249,6 @@ function LilyFlower({
             transform="rotate(42 158 98)"
             fill="#754486"
           />
-
           <ellipse
             cx="112"
             cy="118"
@@ -273,7 +257,6 @@ function LilyFlower({
             transform="rotate(-23 112 118)"
             fill="#D8C3E0"
           />
-
           <ellipse
             cx="148"
             cy="118"
@@ -282,34 +265,17 @@ function LilyFlower({
             transform="rotate(23 148 118)"
             fill="#C29BD0"
           />
-
-          <circle
-            cx="130"
-            cy="111"
-            r="8"
-            fill="#EBCB6A"
-          />
+          <circle cx="130" cy="111" r="8" fill="#EBCB6A" />
         </g>
       </svg>
     </div>
   );
 }
 
-/* CALA */
-
-function CallaFlower({
-  className = "",
-}: {
-  className?: string;
-}) {
+function CallaFlower({ className = "" }: { className?: string }) {
   return (
     <div className={`botanical ${className}`}>
-      <svg
-        width="185"
-        height="250"
-        viewBox="0 0 185 250"
-        fill="none"
-      >
+      <svg width="185" height="250" viewBox="0 0 185 250" fill="none">
         <path
           d="M91 244C91 193 94 146 103 94"
           stroke="#64752F"
@@ -339,12 +305,10 @@ function CallaFlower({
             d="M103 94C74 76 75 41 106 24C132 45 133 78 103 94Z"
             fill="#EEE2F2"
           />
-
           <path
             d="M103 93C100 63 111 44 128 36C143 65 130 87 103 93Z"
             fill="#815799"
           />
-
           <ellipse
             cx="106"
             cy="75"
@@ -359,74 +323,49 @@ function CallaFlower({
   );
 }
 
-/* LAVANDA */
-
-function LavenderBranch({
-  className = "",
-}: {
-  className?: string;
-}) {
+function LavenderBranch({ className = "" }: { className?: string }) {
   return (
     <div className={`botanical ${className}`}>
-      <svg
-        width="150"
-        height="245"
-        viewBox="0 0 150 245"
-        fill="none"
-      >
+      <svg width="150" height="245" viewBox="0 0 150 245" fill="none">
         <path
           d="M62 239C69 189 79 132 87 47"
           stroke="#66753E"
           strokeWidth="3"
         />
 
-        {[61, 84, 107, 130, 153].map(
-          (y, index) => (
-            <g
-              key={y}
-              className="lavender-petal"
-              style={{
-                animationDelay: `${index * 0.18}s`,
-              }}
-            >
-              <ellipse
-                cx={76}
-                cy={y}
-                rx="14"
-                ry="24"
-                transform={`rotate(-36 76 ${y})`}
-                fill={
-                  index % 2 === 0
-                    ? "#815799"
-                    : "#CDB3D9"
-                }
-              />
+        {[61, 84, 107, 130, 153].map((y, index) => (
+          <g
+            key={y}
+            className="lavender-petal"
+            style={{
+              animationDelay: `${index * 0.18}s`,
+            }}
+          >
+            <ellipse
+              cx={76}
+              cy={y}
+              rx="14"
+              ry="24"
+              transform={`rotate(-36 76 ${y})`}
+              fill={index % 2 === 0 ? "#815799" : "#CDB3D9"}
+            />
 
-              <ellipse
-                cx={99}
-                cy={y + 5}
-                rx="12"
-                ry="21"
-                transform={`rotate(36 99 ${
-                  y + 5
-                })`}
-                fill="#633A78"
-              />
-            </g>
-          )
-        )}
+            <ellipse
+              cx={99}
+              cy={y + 5}
+              rx="12"
+              ry="21"
+              transform={`rotate(36 99 ${y + 5})`}
+              fill="#633A78"
+            />
+          </g>
+        ))}
       </svg>
     </div>
   );
 }
 
-/* RAMA VERDE */
-
-function OliveBranch({
-  className = "",
-}: {
-  className?: string;
-}) {
+function OliveBranch({ className = "" }: { className?: string }) {
   const leaves = [
     [73, 193, -38],
     [101, 172, 32],
@@ -439,53 +378,34 @@ function OliveBranch({
 
   return (
     <div className={`botanical ${className}`}>
-      <svg
-        width="155"
-        height="230"
-        viewBox="0 0 155 230"
-        fill="none"
-      >
+      <svg width="155" height="230" viewBox="0 0 155 230" fill="none">
         <path
           d="M59 223C80 178 103 130 132 37"
           stroke="#64752F"
           strokeWidth="3"
         />
 
-        {leaves.map(
-          ([x, y, rotate], index) => (
-            <ellipse
-              key={index}
-              cx={x}
-              cy={y}
-              rx="25"
-              ry="9"
-              transform={`rotate(${rotate} ${x} ${y})`}
-              fill={
-                index % 2 === 0
-                  ? "#879D49"
-                  : "#A7B38A"
-              }
-              opacity=".93"
-              className="leaf-animated"
-            />
-          )
-        )}
+        {leaves.map(([x, y, rotate], index) => (
+          <ellipse
+            key={index}
+            cx={x}
+            cy={y}
+            rx="25"
+            ry="9"
+            transform={`rotate(${rotate} ${x} ${y})`}
+            fill={index % 2 === 0 ? "#879D49" : "#A7B38A"}
+            opacity=".93"
+            className="leaf-animated"
+          />
+        ))}
       </svg>
     </div>
   );
 }
 
-/* PETALOS */
-
-function PetalCluster({
-  className = "",
-}: {
-  className?: string;
-}) {
+function PetalCluster({ className = "" }: { className?: string }) {
   return (
-    <div
-      className={`botanical h-32 w-32 ${className}`}
-    >
+    <div className={`botanical h-32 w-32 ${className}`}>
       <span className="petal petal-1" />
       <span className="petal petal-2" />
       <span className="petal petal-3" />
@@ -496,11 +416,7 @@ function PetalCluster({
 function Decoration({
   type,
 }: {
-  type:
-    | "lily"
-    | "calla"
-    | "lavender"
-    | "olive";
+  type: "lily" | "calla" | "lavender" | "olive";
 }) {
   if (type === "lily") {
     return (
@@ -530,55 +446,42 @@ export default function Home() {
     <main className="min-h-screen overflow-hidden bg-[#F7F4EE] text-[#2E2830]">
 
       {/* HEADER */}
-
       <header className="sticky top-0 z-50 border-b border-[#E6E0D8] bg-[#F7F4EE]/95 backdrop-blur-xl">
 
-        <div className="mx-auto flex max-w-7xl items-center justify-between px-6 py-4">
+        <div className="mx-auto flex max-w-7xl items-center justify-between gap-3 px-4 py-4 sm:gap-4 sm:px-6">
 
           <a
             href="#inicio"
-            className="flex items-center gap-3 text-[#3D4036]"
+            className="flex min-w-0 items-center gap-2 text-[#3D4036] sm:gap-3"
           >
             <span className="hidden text-[#633A78] sm:block">
               <LotusIcon />
             </span>
 
-            <span className="font-display text-3xl font-semibold tracking-[0.17em]">
+            <span className="font-display text-[1.7rem] font-semibold tracking-[0.12em] sm:text-3xl sm:tracking-[0.17em]">
               MISTICA
             </span>
 
-            <span className="text-xs font-semibold tracking-[0.35em] text-[#6F8F7A]">
+            <span className="text-[0.62rem] font-semibold tracking-[0.22em] text-[#6F8F7A] sm:text-xs sm:tracking-[0.35em]">
               SPA
             </span>
           </a>
 
           <nav className="hidden gap-9 text-sm font-medium text-[#4E504B] md:flex">
 
-            <a
-              href="#inicio"
-              className="transition hover:text-[#815799]"
-            >
+            <a href="#inicio" className="transition hover:text-[#815799]">
               Inicio
             </a>
 
-            <a
-              href="#servicios"
-              className="transition hover:text-[#815799]"
-            >
+            <a href="#servicios" className="transition hover:text-[#815799]">
               Servicios
             </a>
 
-            <a
-              href="#horarios"
-              className="transition hover:text-[#815799]"
-            >
+            <a href="#horarios" className="transition hover:text-[#815799]">
               Horarios
             </a>
 
-            <a
-              href="#contacto"
-              className="transition hover:text-[#815799]"
-            >
+            <a href="#contacto" className="transition hover:text-[#815799]">
               Contacto
             </a>
 
@@ -586,9 +489,15 @@ export default function Home() {
 
           <a
             href="#reservar"
-            className="lux-button rounded-full bg-[#2F7057] px-6 py-3 text-sm font-semibold text-white hover:bg-[#255B47]"
+            className="lux-button shrink-0 rounded-full bg-[#2F7057] px-4 py-3 text-sm font-semibold leading-tight text-white hover:bg-[#255B47] sm:px-6"
           >
-            Reservar turno
+            <span className="hidden sm:inline">
+              Reservar turno
+            </span>
+
+            <span className="sm:hidden">
+              Reservar
+            </span>
           </a>
 
         </div>
@@ -596,35 +505,38 @@ export default function Home() {
       </header>
 
       {/* HERO */}
-
       <section
         id="inicio"
-        className="relative overflow-hidden px-6 py-20 md:py-28"
+        className="relative overflow-hidden px-4 py-16 sm:px-6 sm:py-20 md:py-28"
       >
 
-        <OliveBranch className="-left-9 -top-12 rotate-[18deg] scale-[0.8] opacity-70" />
+        <OliveBranch className="-left-10 top-4 scale-[0.64] opacity-55 sm:-left-9 sm:-top-12 sm:rotate-[18deg] sm:scale-[0.8] sm:opacity-70" />
 
-        <LavenderBranch className="-right-6 top-8 scale-[0.8] opacity-60" />
+        <LavenderBranch className="-right-10 top-28 scale-[0.58] opacity-45 sm:-right-6 sm:top-8 sm:scale-[0.8] sm:opacity-60" />
 
-        <PetalCluster className="right-[18%] top-[12%]" />
+        <PetalCluster className="right-[8%] top-[22%] sm:right-[18%] sm:top-[12%]" />
 
         <div className="relative z-10 mx-auto grid max-w-7xl items-center gap-12 md:grid-cols-2">
 
           <div className="animate-fade-left">
 
-            <p className="mb-5 text-xs font-semibold uppercase tracking-[0.4em] text-[#633A78]">
+            <p className="mb-5 max-w-[20rem] text-xs font-semibold uppercase leading-6 tracking-[0.32em] text-[#633A78] sm:max-w-none sm:tracking-[0.4em]">
               Bienestar · Belleza · Relajación
             </p>
 
-            <h1 className="font-display text-6xl font-semibold leading-[0.94] text-[#2F2930] md:text-8xl">
+            <h1 className="max-w-[22rem] font-display text-[3.7rem] font-semibold leading-[0.88] tracking-[-0.035em] text-[#2F2930] sm:max-w-xl sm:text-6xl sm:leading-[0.94] md:text-8xl">
 
-              Tu momento de
+              <span className="block whitespace-nowrap">
+                Tu momento de
+              </span>
 
               <span className="block italic text-[#815799]">
                 bienestar
               </span>
 
-              comienza aquí.
+              <span className="block">
+                comienza aquí.
+              </span>
 
             </h1>
 
@@ -656,13 +568,13 @@ export default function Home() {
 
           <div className="animate-fade-right">
 
-            <div className="relative mx-auto flex min-h-[440px] max-w-lg items-center justify-center overflow-hidden rounded-[4rem_1rem_4rem_1rem] bg-gradient-to-br from-[#DCC9E3] via-[#EFE5F2] to-[#DDE1CF] shadow-[0_28px_70px_rgba(74,35,86,0.18)]">
+            <div className="relative mx-auto flex min-h-[380px] max-w-lg items-center justify-center overflow-hidden rounded-[3rem_1rem_3rem_1rem] bg-gradient-to-br from-[#DCC9E3] via-[#EFE5F2] to-[#DDE1CF] shadow-[0_28px_70px_rgba(74,35,86,0.18)] sm:min-h-[440px] sm:rounded-[4rem_1rem_4rem_1rem]">
 
-              <LilyFlower className="-bottom-16 -right-3 z-[1] scale-[1.05]" />
+              <LilyFlower className="-bottom-16 -right-10 z-[1] scale-[0.82] sm:-right-3 sm:scale-[1.05]" />
 
-              <CallaFlower className="-left-8 -top-24 z-[1] rotate-180 scale-[0.8] opacity-70" />
+              <CallaFlower className="-left-12 -top-24 z-[1] rotate-180 scale-[0.68] opacity-65 sm:-left-8 sm:scale-[0.8] sm:opacity-70" />
 
-              <div className="absolute inset-5 rounded-[3.4rem_.7rem_3.4rem_.7rem] border border-white/70" />
+              <div className="absolute inset-5 rounded-[2.4rem_.7rem_2.4rem_.7rem] border border-white/70 sm:rounded-[3.4rem_.7rem_3.4rem_.7rem]" />
 
               <div className="relative z-10 text-center text-[#4A2356]">
 
@@ -674,13 +586,13 @@ export default function Home() {
                   Mistica
                 </p>
 
-                <p className="mt-3 font-display text-7xl font-semibold">
+                <p className="mt-3 font-display text-6xl font-semibold sm:text-7xl">
                   SPA
                 </p>
 
                 <div className="mx-auto my-6 h-px w-20 bg-[#815799]" />
 
-                <p className="text-xs font-semibold tracking-[0.25em]">
+                <p className="px-4 text-xs font-semibold tracking-[0.2em] sm:tracking-[0.25em]">
                   RELÁJATE · RENUEVA · DISFRUTA
                 </p>
 
@@ -695,10 +607,9 @@ export default function Home() {
       </section>
 
       {/* SERVICIOS */}
-
       <section
         id="servicios"
-        className="relative bg-[#FCFAF6] px-6 py-24"
+        className="relative bg-[#FCFAF6] px-4 py-20 sm:px-6 sm:py-24"
       >
 
         <div className="mx-auto max-w-7xl">
@@ -709,7 +620,7 @@ export default function Home() {
               Nuestros servicios
             </p>
 
-            <h2 className="mt-4 font-display text-5xl font-semibold text-[#3B174D] md:text-6xl">
+            <h2 className="mt-4 font-display text-4xl font-semibold text-[#3B174D] sm:text-5xl md:text-6xl">
               Encuentra el tratamiento ideal para ti
             </h2>
 
@@ -721,77 +632,68 @@ export default function Home() {
 
           <div className="grid gap-6 md:grid-cols-2">
 
-            {servicios.map(
-              (grupo) => (
+            {servicios.map((grupo) => (
 
-                <article
-                  key={grupo.categoria}
-                  className={`lux-card reveal relative overflow-hidden rounded-[1.8rem] bg-gradient-to-br ${grupo.color} p-7 ${grupo.text}`}
-                >
+              <article
+                key={grupo.categoria}
+                className={`lux-card reveal relative overflow-hidden rounded-[1.8rem] bg-gradient-to-br ${grupo.color} p-6 sm:p-7 ${grupo.text}`}
+              >
 
-                  {/* La planta tiene su propia zona.
-                      No queda debajo de los botones. */}
+                <Decoration type={grupo.decoracion} />
 
-                  <Decoration
-                    type={grupo.decoracion}
-                  />
+                <div className="relative z-10 pr-0 lg:pr-[150px]">
 
-                  <div className="relative z-10 pr-0 lg:pr-[150px]">
+                  <div className="mb-6 flex items-center gap-3">
 
-                    <div className="mb-6 flex items-center gap-3">
-
-                      <div className="flex h-11 w-11 shrink-0 items-center justify-center rounded-full border border-current/30 bg-white/15">
-                        <LotusIcon />
-                      </div>
-
-                      <h3 className="font-display text-3xl font-semibold">
-                        {grupo.categoria}
-                      </h3>
-
+                    <div className="flex h-11 w-11 shrink-0 items-center justify-center rounded-full border border-current/30 bg-white/15">
+                      <LotusIcon />
                     </div>
 
-                    <div className="space-y-5">
-
-                      {grupo.items.map(
-                        (servicio) => (
-
-                          <div
-                            key={servicio.nombre}
-                            className="max-w-[100%] border-b border-current/15 pb-4 lg:max-w-[92%]"
-                          >
-
-                            <div className="flex flex-col gap-2">
-
-                              <p className="text-sm font-semibold">
-                                {servicio.nombre}
-                              </p>
-
-                              <p className="max-w-lg text-xs leading-5 opacity-80">
-                                {servicio.descripcion}
-                              </p>
-
-                              <a
-                                href="#reservar"
-                                className="mt-1 w-fit text-xs font-semibold underline decoration-current/30 underline-offset-4 transition hover:translate-x-1"
-                              >
-                                Reservar →
-                              </a>
-
-                            </div>
-
-                          </div>
-
-                        )
-                      )}
-
-                    </div>
+                    <h3 className="font-display text-2xl font-semibold sm:text-3xl">
+                      {grupo.categoria}
+                    </h3>
 
                   </div>
 
-                </article>
+                  <div className="space-y-5">
 
-              )
-            )}
+                    {grupo.items.map((servicio) => (
+
+                      <div
+                        key={servicio.nombre}
+                        className="max-w-[100%] border-b border-current/15 pb-4 lg:max-w-[92%]"
+                      >
+
+                        <div className="flex flex-col gap-2">
+
+                          <p className="text-sm font-semibold">
+                            {servicio.nombre}
+                          </p>
+
+                          <p className="max-w-lg text-xs leading-5 opacity-80">
+                            {servicio.descripcion}
+                          </p>
+
+                          <a
+                            href="#reservar"
+                            className="mt-1 w-fit text-xs font-semibold underline decoration-current/30 underline-offset-4 transition hover:translate-x-1"
+                          >
+                            Reservar →
+                          </a>
+
+                        </div>
+
+                      </div>
+
+                    ))}
+
+                  </div>
+
+                </div>
+
+              </article>
+
+            ))}
 
           </div>
 
@@ -800,17 +702,16 @@ export default function Home() {
       </section>
 
       {/* HORARIOS */}
-
       <section
         id="horarios"
-        className="relative px-6 py-24"
+        className="relative px-4 py-20 sm:px-6 sm:py-24"
       >
 
-        <div className="reveal relative mx-auto grid max-w-6xl items-center gap-10 overflow-hidden rounded-[3rem] bg-gradient-to-r from-[#3B174D] via-[#4A2356] to-[#633A78] px-8 py-14 text-white shadow-2xl md:grid-cols-2 md:px-14">
+        <div className="reveal relative mx-auto grid max-w-6xl items-center gap-10 overflow-hidden rounded-[2.2rem] bg-gradient-to-r from-[#3B174D] via-[#4A2356] to-[#633A78] px-6 py-12 text-white shadow-2xl sm:rounded-[3rem] sm:px-8 sm:py-14 md:grid-cols-2 md:px-14">
 
-          <LilyFlower className="-bottom-20 -left-9 z-[1] scale-[0.72] opacity-85" />
+          <LilyFlower className="-bottom-20 -left-12 z-[1] scale-[0.62] opacity-75 sm:-left-9 sm:scale-[0.72] sm:opacity-85" />
 
-          <CallaFlower className="-bottom-20 -right-7 z-[1] scale-[0.74] opacity-85" />
+          <CallaFlower className="-bottom-20 -right-10 z-[1] scale-[0.62] opacity-75 sm:-right-7 sm:scale-[0.74] sm:opacity-85" />
 
           <div className="relative z-10">
 
@@ -818,7 +719,7 @@ export default function Home() {
               Horarios
             </p>
 
-            <h2 className="mt-4 font-display text-5xl font-semibold">
+            <h2 className="mt-4 font-display text-4xl font-semibold sm:text-5xl">
               Reserva el momento que mejor se adapte a ti
             </h2>
 
@@ -828,12 +729,10 @@ export default function Home() {
 
           </div>
 
-          <div className="relative z-10 rounded-[1.8rem] border border-white/20 bg-white/10 p-7 backdrop-blur">
+          <div className="relative z-10 rounded-[1.8rem] border border-white/20 bg-white/10 p-6 backdrop-blur sm:p-7">
 
             <div className="flex justify-between border-b border-white/20 py-4">
-              <span>
-                Lunes a sábado
-              </span>
+              <span>Lunes a sábado</span>
 
               <strong>
                 08:00 - 20:00
@@ -841,9 +740,7 @@ export default function Home() {
             </div>
 
             <div className="flex justify-between py-4">
-              <span>
-                Domingo
-              </span>
+              <span>Domingo</span>
 
               <strong>
                 Cerrado
@@ -857,19 +754,17 @@ export default function Home() {
       </section>
 
       {/* RESERVAS */}
-
       <BookingForm />
 
       {/* CONTACTO */}
-
       <section
         id="contacto"
-        className="relative overflow-hidden bg-[#FCFAF6] px-6 py-24"
+        className="relative overflow-hidden bg-[#FCFAF6] px-4 py-20 sm:px-6 sm:py-24"
       >
 
-        <LavenderBranch className="-bottom-20 -right-4 scale-[0.95] opacity-75" />
+        <LavenderBranch className="-bottom-20 -right-8 scale-[0.7] opacity-55 sm:-right-4 sm:scale-[0.95] sm:opacity-75" />
 
-        <OliveBranch className="-bottom-24 -left-8 scale-[0.8] opacity-50" />
+        <OliveBranch className="-bottom-24 -left-10 scale-[0.65] opacity-40 sm:-left-8 sm:scale-[0.8] sm:opacity-50" />
 
         <div className="relative z-10 mx-auto grid max-w-6xl gap-8 md:grid-cols-2">
 
@@ -879,7 +774,7 @@ export default function Home() {
               Contacto
             </p>
 
-            <h2 className="mt-3 font-display text-5xl font-semibold text-[#3B174D]">
+            <h2 className="mt-3 font-display text-4xl font-semibold text-[#3B174D] sm:text-5xl">
               Mistica Spa
             </h2>
 
@@ -917,31 +812,12 @@ export default function Home() {
                 className="lux-button rounded-full border border-[#D7D1C9] bg-white px-5 py-3 text-sm font-semibold"
               >
                 <span className="google-g">
-
-                  <span className="google-blue">
-                    G
-                  </span>
-
-                  <span className="google-red">
-                    o
-                  </span>
-
-                  <span className="google-yellow">
-                    o
-                  </span>
-
-                  <span className="google-blue">
-                    g
-                  </span>
-
-                  <span className="google-green">
-                    l
-                  </span>
-
-                  <span className="google-red">
-                    e
-                  </span>
-
+                  <span className="google-blue">G</span>
+                  <span className="google-red">o</span>
+                  <span className="google-yellow">o</span>
+                  <span className="google-blue">g</span>
+                  <span className="google-green">l</span>
+                  <span className="google-red">e</span>
                 </span>{" "}
                 · Dejar una reseña
               </a>
@@ -959,45 +835,24 @@ export default function Home() {
 
           </div>
 
-          {/* GOOGLE */}
+          <div className="lux-card reveal relative overflow-hidden rounded-[2rem] border border-[#E1D9E4] bg-gradient-to-br from-white to-[#F1EAF4] p-7 sm:p-9">
 
-          <div className="lux-card reveal relative overflow-hidden rounded-[2rem] border border-[#E1D9E4] bg-gradient-to-br from-white to-[#F1EAF4] p-9">
-
-            <CallaFlower className="-bottom-24 -right-3 z-[1] scale-[0.7] opacity-75" />
+            <CallaFlower className="-bottom-24 -right-6 z-[1] scale-[0.58] opacity-60 sm:-right-3 sm:scale-[0.7] sm:opacity-75" />
 
             <div className="relative z-10">
 
               <p className="google-g text-lg">
-
-                <span className="google-blue">
-                  G
-                </span>
-
-                <span className="google-red">
-                  o
-                </span>
-
-                <span className="google-yellow">
-                  o
-                </span>
-
-                <span className="google-blue">
-                  g
-                </span>
-
-                <span className="google-green">
-                  l
-                </span>
-
-                <span className="google-red">
-                  e
-                </span>
-
+                <span className="google-blue">G</span>
+                <span className="google-red">o</span>
+                <span className="google-yellow">o</span>
+                <span className="google-blue">g</span>
+                <span className="google-green">l</span>
+                <span className="google-red">e</span>
               </p>
 
               <div className="mt-3 flex items-center gap-4">
 
-                <p className="font-display text-6xl font-semibold text-[#633A78]">
+                <p className="font-display text-5xl font-semibold text-[#633A78] sm:text-6xl">
                   4.9
                 </p>
 
@@ -1029,7 +884,6 @@ export default function Home() {
       </section>
 
       {/* FOOTER */}
-
       <footer className="relative overflow-hidden bg-gradient-to-r from-[#3B174D] to-[#633A78] px-6 py-10 text-white">
 
         <div className="mx-auto flex max-w-7xl flex-col items-center justify-between gap-5 md:flex-row">
