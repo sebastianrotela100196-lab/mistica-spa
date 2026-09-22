@@ -1,7 +1,7 @@
 "use client";
-
 import {
   type FormEvent,
+  type ReactNode,
   useCallback,
   useEffect,
   useMemo,
@@ -9,7 +9,7 @@ import {
 } from "react";
 
 import { supabase } from "@/app/lib/supabase";
-
+import PromotionsManager from "@/app/components/PromotionsManager";
 type Reservation = {
   id: string;
   customer_name: string;
@@ -60,6 +60,89 @@ const HOURS = [
   "19:00",
   "20:00",
 ];
+
+const WEEKDAYS = [
+  { value: 1, label: "Lunes" },
+  { value: 2, label: "Martes" },
+  { value: 3, label: "Miércoles" },
+  { value: 4, label: "Jueves" },
+  { value: 5, label: "Viernes" },
+  { value: 6, label: "Sábado" },
+];
+
+type ManualMode = "single" | "package";
+
+function ymdToLocalDate(ymd: string) {
+  const [year, month, day] = ymd
+    .split("-")
+    .map(Number);
+
+  return new Date(
+    year,
+    month - 1,
+    day,
+    12,
+    0,
+    0,
+    0
+  );
+}
+
+function localDateToYMD(date: Date) {
+  const year = date.getFullYear();
+  const month = String(
+    date.getMonth() + 1
+  ).padStart(2, "0");
+  const day = String(
+    date.getDate()
+  ).padStart(2, "0");
+
+  return `${year}-${month}-${day}`;
+}
+
+function generatePackageDates(
+  startDate: string,
+  weekdays: number[],
+  count: number
+) {
+  if (
+    !startDate ||
+    weekdays.length === 0 ||
+    count <= 0
+  ) {
+    return [] as string[];
+  }
+
+  const dates: string[] = [];
+  const cursor = ymdToLocalDate(
+    startDate
+  );
+
+  let guard = 0;
+
+  while (
+    dates.length < count &&
+    guard < 370
+  ) {
+    if (
+      weekdays.includes(
+        cursor.getDay()
+      )
+    ) {
+      dates.push(
+        localDateToYMD(cursor)
+      );
+    }
+
+    cursor.setDate(
+      cursor.getDate() + 1
+    );
+
+    guard++;
+  }
+
+  return dates;
+}
 
 const statusLabels: Record<string, string> = {
   pending: "Pendiente",
@@ -150,6 +233,69 @@ function statusClasses(status: string) {
   }
 }
 
+type AdminToolProps = {
+  eyebrow: string;
+  title: string;
+  children: ReactNode;
+  dark?: boolean;
+};
+
+function AdminTool({
+  eyebrow,
+  title,
+  children,
+  dark = false,
+}: AdminToolProps) {
+  return (
+    <details
+      className={`group overflow-hidden rounded-3xl shadow-sm ${
+        dark
+          ? "bg-[#765648] text-white"
+          : "bg-white text-[#332a27]"
+      }`}
+    >
+      <summary className="flex cursor-pointer list-none items-center justify-between gap-4 px-6 py-5">
+        <div>
+          <p
+            className={`text-xs uppercase tracking-[0.22em] ${
+              dark
+                ? "text-white/60"
+                : "text-[#9c7968]"
+            }`}
+          >
+            {eyebrow}
+          </p>
+
+          <h2 className="mt-1 text-lg font-medium">
+            {title}
+          </h2>
+        </div>
+
+        <span
+          className={`rounded-full border px-4 py-2 text-xs font-medium transition group-open:rotate-180 ${
+            dark
+              ? "border-white/40 text-white"
+              : "border-[#765648] text-[#765648]"
+          }`}
+          aria-hidden="true"
+        >
+          ↓
+        </span>
+      </summary>
+
+      <div
+        className={`border-t px-6 pb-6 pt-5 ${
+          dark
+            ? "border-white/20"
+            : "border-[#eee4dd]"
+        }`}
+      >
+        {children}
+      </div>
+    </details>
+  );
+}
+
 export default function AdminPage() {
   const [checkingSession, setCheckingSession] =
     useState(true);
@@ -227,6 +373,15 @@ export default function AdminPage() {
   const [savingManual, setSavingManual] =
     useState(false);
 
+
+  const [manualMode, setManualMode] =
+    useState<ManualMode>("single");
+
+  const [packageCount, setPackageCount] =
+    useState(10);
+
+  const [packageDays, setPackageDays] =
+    useState<number[]>([1, 3, 5]);
   // REPROGRAMAR
   const [
     reprogramReservation,
@@ -301,6 +456,21 @@ export default function AdminPage() {
           service.id === manualServiceId
       ),
     [services, manualServiceId]
+  );
+
+
+  const packageDates = useMemo(
+    () =>
+      generatePackageDates(
+        manualDate,
+        packageDays,
+        packageCount
+      ),
+    [
+      manualDate,
+      packageDays,
+      packageCount,
+    ]
   );
 
   const reservationsForDate =
@@ -532,6 +702,20 @@ export default function AdminPage() {
   // HORARIOS TURNO MANUAL
   useEffect(() => {
     async function loadSlots() {
+      if (manualMode === "package") {
+        setLoadingManualSlots(false);
+        setManualSlots(HOURS);
+
+        if (
+          manualTime &&
+          !HOURS.includes(manualTime)
+        ) {
+          setManualTime("");
+        }
+
+        return;
+      }
+
       if (
         !manualDate ||
         !manualStaffId
@@ -591,6 +775,8 @@ export default function AdminPage() {
   }, [
     manualDate,
     manualStaffId,
+    manualMode,
+    manualTime,
   ]);
 
   // HORARIOS REPROGRAMACIÓN
@@ -987,14 +1173,16 @@ export default function AdminPage() {
 
     if (!manualDate) {
       alert(
-        "Selecciona una fecha."
+        manualMode === "package"
+          ? "Selecciona la fecha desde la que comenzará el paquete."
+          : "Selecciona una fecha."
       );
       return;
     }
 
     if (!manualTime) {
       alert(
-        "Selecciona un horario disponible."
+        "Selecciona un horario."
       );
       return;
     }
@@ -1011,13 +1199,224 @@ export default function AdminPage() {
       return;
     }
 
+    /* =========================================
+       TURNO INDIVIDUAL
+    ========================================= */
+    if (manualMode === "single") {
+      setSavingManual(true);
+
+      const {
+        data,
+        error,
+      } =
+        await supabase.rpc(
+          "create_booking",
+          {
+            p_customer_name:
+              manualName.trim(),
+
+            p_customer_phone:
+              phone,
+
+            p_service_id:
+              manualServiceId,
+
+            p_staff_id:
+              manualStaffId,
+
+            p_duration:
+              manualDuration,
+
+            p_date:
+              manualDate,
+
+            p_time:
+              `${manualTime}:00`,
+
+            p_notes:
+              manualNotes.trim() ||
+              null,
+          }
+        );
+
+      setSavingManual(false);
+
+      if (error) {
+        console.error(error);
+
+        alert(
+          `No se pudo crear el turno:\n${error.message}`
+        );
+
+        return;
+      }
+
+      alert(
+        `Turno creado correctamente.\nCódigo: ${String(
+          data
+        ).slice(0, 8)}`
+      );
+
+      setMessage(
+        "Turno creado correctamente."
+      );
+
+      setManualName("");
+      setManualPhone("");
+      setManualNotes("");
+      setManualTime("");
+
+      setSelectedDate(
+        manualDate
+      );
+
+      await loadAdminData();
+      return;
+    }
+
+    /* =========================================
+       PAQUETE DE SESIONES
+    ========================================= */
+    if (
+      packageCount < 2 ||
+      packageCount > 50
+    ) {
+      alert(
+        "La cantidad de sesiones debe estar entre 2 y 50."
+      );
+      return;
+    }
+
+    if (packageDays.length === 0) {
+      alert(
+        "Selecciona al menos un día de la semana."
+      );
+      return;
+    }
+
+    if (
+      packageDates.length !==
+      packageCount
+    ) {
+      alert(
+        "No se pudieron generar todas las fechas del paquete."
+      );
+      return;
+    }
+
+    const confirmPackage =
+      window.confirm(
+        `Se crearán ${packageCount} sesiones para ${manualName.trim()} a las ${manualTime}.\n\n¿Continuar?`
+      );
+
+    if (!confirmPackage) {
+      return;
+    }
+
     setSavingManual(true);
 
-    const {
-      data,
-      error,
-    } =
-      await supabase.rpc(
+    /*
+     * Primero comprobamos TODAS las fechas.
+     * Si una está ocupada, no creamos ninguna.
+     */
+    const occupiedDates: string[] = [];
+
+    for (const date of packageDates) {
+      const {
+        data,
+        error,
+      } = await supabase.rpc(
+        "get_available_slots",
+        {
+          p_date: date,
+          p_staff_id:
+            manualStaffId,
+        }
+      );
+
+      if (error) {
+        console.error(error);
+        setSavingManual(false);
+
+        alert(
+          `No se pudo comprobar la disponibilidad del ${formatLongDate(
+            date
+          )}:\n${error.message}`
+        );
+
+        return;
+      }
+
+      const slots =
+        (data ?? []).map(
+          (
+            row: {
+              slot_time: string;
+            }
+          ) =>
+            row.slot_time.slice(
+              0,
+              5
+            )
+        );
+
+      if (
+        !slots.includes(
+          manualTime
+        )
+      ) {
+        occupiedDates.push(date);
+      }
+    }
+
+    if (occupiedDates.length > 0) {
+      setSavingManual(false);
+
+      const detail = occupiedDates
+        .map(
+          (date) =>
+            `• ${formatLongDate(
+              date
+            )} - ${manualTime}`
+        )
+        .join("\n");
+
+      alert(
+        `No se creó el paquete porque estos horarios no están disponibles:\n\n${detail}\n\nCambia la hora, los días o la profesional.`
+      );
+
+      return;
+    }
+
+    /*
+     * Todas las fechas están libres.
+     * Ahora creamos las reservas una por una.
+     * Si una falla por una carrera de concurrencia,
+     * eliminamos las ya creadas para no dejar
+     * un paquete incompleto.
+     */
+    const createdIds: string[] = [];
+
+    for (
+      let index = 0;
+      index < packageDates.length;
+      index++
+    ) {
+      const date =
+        packageDates[index];
+
+      const packageNote = [
+        `Paquete de ${packageCount} sesiones`,
+        `Sesión ${index + 1} de ${packageCount}`,
+        manualNotes.trim(),
+      ]
+        .filter(Boolean)
+        .join(" · ");
+
+      const {
+        data,
+        error,
+      } = await supabase.rpc(
         "create_booking",
         {
           p_customer_name:
@@ -1036,47 +1435,67 @@ export default function AdminPage() {
             manualDuration,
 
           p_date:
-            manualDate,
+            date,
 
           p_time:
             `${manualTime}:00`,
 
           p_notes:
-            manualNotes.trim() ||
-            null,
+            packageNote,
         }
       );
 
-    setSavingManual(false);
+      if (error) {
+        console.error(error);
 
-    if (error) {
-      console.error(error);
+        for (
+          const reservationId of
+          createdIds
+        ) {
+          await supabase.rpc(
+            "admin_delete_booking",
+            {
+              p_reservation_id:
+                reservationId,
+            }
+          );
+        }
 
-      alert(
-        `No se pudo crear el turno:\n${error.message}`
+        setSavingManual(false);
+
+        alert(
+          `No se pudo completar el paquete.\n\nFalló la sesión ${index + 1} del ${formatLongDate(
+            date
+          )} a las ${manualTime}.\n\nLas sesiones creadas durante este intento fueron eliminadas para no dejar el paquete incompleto.\n\n${error.message}`
+        );
+
+        await loadAdminData();
+        return;
+      }
+
+      createdIds.push(
+        String(data)
       );
-
-      return;
     }
 
+    setSavingManual(false);
+
     alert(
-      `Turno creado correctamente.\nCódigo: ${String(
-        data
-      ).slice(0, 8)}`
+      `Paquete creado correctamente.\n\n${packageCount} sesiones reservadas para ${manualName.trim()}.`
     );
 
     setMessage(
-      "Turno creado correctamente."
+      `Paquete creado correctamente: ${packageCount} sesiones.`
+    );
+
+    setSelectedDate(
+      packageDates[0]
     );
 
     setManualName("");
     setManualPhone("");
     setManualNotes("");
     setManualTime("");
-
-    setSelectedDate(
-      manualDate
-    );
 
     await loadAdminData();
   }
@@ -1850,7 +2269,7 @@ export default function AdminPage() {
 
         </section>
 
-        <div className="mt-10 grid gap-8 lg:grid-cols-[1.5fr_1fr]">
+        <div className="mt-10 space-y-10">
 
           {/* TURNOS */}
           <section>
@@ -2067,19 +2486,75 @@ export default function AdminPage() {
             )}
 
           </section>
+               
+          <aside className="space-y-3">
 
-          <aside>
+            <div className="mb-5">
+              <p className="text-sm uppercase tracking-[0.3em] text-[#9c7968]">
+                Herramientas
+              </p>
 
-            {/* TURNO MANUAL */}
-            <section className="rounded-3xl bg-white p-6 shadow-sm">
+              <h2 className="mt-2 text-2xl font-medium">
+                Administración
+              </h2>
 
+              <p className="mt-2 text-sm text-[#756762]">
+                Abre solamente la herramienta que necesites. La agenda permanece visible arriba.
+              </p>
+            </div>
+
+            {/* TURNO MANUAL / PAQUETE */}
+            <AdminTool
+              eyebrow="Reservas"
+              title="Crear turno manual o paquete"
+            >
               <h2 className="text-xl font-medium">
                 Crear turno manual
               </h2>
 
               <p className="mt-2 text-sm text-[#756762]">
-                Para reservas recibidas por llamada o WhatsApp.
+                Puedes crear una sola reserva o un paquete completo de sesiones.
               </p>
+
+              <div className="mt-5 grid grid-cols-2 gap-2 rounded-2xl bg-[#f8f4ef] p-1">
+
+                <button
+                  type="button"
+                  onClick={() => {
+                    setManualMode(
+                      "single"
+                    );
+                    setManualTime("");
+                  }}
+                  className={`rounded-xl px-3 py-3 text-sm font-medium transition ${
+                    manualMode ===
+                    "single"
+                      ? "bg-[#765648] text-white shadow-sm"
+                      : "text-[#765648]"
+                  }`}
+                >
+                  Una sesión
+                </button>
+
+                <button
+                  type="button"
+                  onClick={() => {
+                    setManualMode(
+                      "package"
+                    );
+                    setManualTime("");
+                  }}
+                  className={`rounded-xl px-3 py-3 text-sm font-medium transition ${
+                    manualMode ===
+                    "package"
+                      ? "bg-[#765648] text-white shadow-sm"
+                      : "text-[#765648]"
+                  }`}
+                >
+                  Paquete de sesiones
+                </button>
+
+              </div>
 
               <form
                 onSubmit={
@@ -2092,9 +2567,7 @@ export default function AdminPage() {
                   type="text"
                   required
                   placeholder="Nombre y apellido"
-                  value={
-                    manualName
-                  }
+                  value={manualName}
                   onChange={(e) =>
                     setManualName(
                       e.target.value
@@ -2107,9 +2580,7 @@ export default function AdminPage() {
                   type="tel"
                   required
                   placeholder="0981 123 456"
-                  value={
-                    manualPhone
-                  }
+                  value={manualPhone}
                   onChange={(e) =>
                     setManualPhone(
                       e.target.value
@@ -2120,21 +2591,17 @@ export default function AdminPage() {
 
                 <select
                   required
-                  value={
-                    manualServiceId
-                  }
+                  value={manualServiceId}
                   onChange={(e) => {
                     setManualServiceId(
                       e.target.value
                     );
-
                     setManualDuration(
                       null
                     );
                   }}
                   className="w-full rounded-xl border border-[#dfd2c7] px-4 py-3"
                 >
-
                   <option value="">
                     Selecciona servicio
                   </option>
@@ -2142,32 +2609,22 @@ export default function AdminPage() {
                   {services.map(
                     (service) => (
                       <option
-                        key={
-                          service.id
-                        }
-                        value={
-                          service.id
-                        }
+                        key={service.id}
+                        value={service.id}
                       >
-                        {
-                          service.name
-                        }
+                        {service.name}
                       </option>
                     )
                   )}
-
                 </select>
 
                 {manualService && (
-
                   <div>
-
                     <p className="mb-2 text-sm font-medium">
                       Duración
                     </p>
 
                     <div className="grid grid-cols-3 gap-2">
-
                       {manualService.allowed_durations
                         .slice()
                         .sort(
@@ -2176,11 +2633,8 @@ export default function AdminPage() {
                         )
                         .map(
                           (duration) => (
-
                             <button
-                              key={
-                                duration
-                              }
+                              key={duration}
                               type="button"
                               onClick={() =>
                                 setManualDuration(
@@ -2194,33 +2648,25 @@ export default function AdminPage() {
                                   : "border-[#dfd2c7]"
                               }`}
                             >
-                              {
-                                duration
-                              }{" "}
-                              min
+                              {duration} min
                             </button>
-
                           )
                         )}
-
                     </div>
-
                   </div>
                 )}
 
                 <select
                   required
-                  value={
-                    manualStaffId
-                  }
-                  onChange={(e) =>
+                  value={manualStaffId}
+                  onChange={(e) => {
                     setManualStaffId(
                       e.target.value
-                    )
-                  }
+                    );
+                    setManualTime("");
+                  }}
                   className="w-full rounded-xl border border-[#dfd2c7] px-4 py-3"
                 >
-
                   <option value="">
                     Selecciona profesional
                   </option>
@@ -2228,91 +2674,217 @@ export default function AdminPage() {
                   {staff.map(
                     (person) => (
                       <option
-                        key={
-                          person.id
-                        }
-                        value={
-                          person.id
-                        }
+                        key={person.id}
+                        value={person.id}
                       >
-                        {
-                          person.name
-                        }
+                        {person.name}
                       </option>
                     )
                   )}
-
                 </select>
 
-                <input
-                  type="date"
-                  required
-                  min={todayYMD()}
-                  value={
-                    manualDate
-                  }
-                  onChange={(e) =>
-                    setManualDate(
-                      e.target.value
-                    )
-                  }
-                  className="w-full rounded-xl border border-[#dfd2c7] px-4 py-3"
-                />
+                <div>
+                  <label className="mb-2 block text-sm font-medium">
+                    {manualMode ===
+                    "package"
+                      ? "Comenzar desde"
+                      : "Fecha"}
+                  </label>
 
-                <select
-                  required
-                  value={
-                    manualTime
-                  }
-                  onChange={(e) =>
-                    setManualTime(
-                      e.target.value
-                    )
-                  }
-                  disabled={
-                    !manualStaffId ||
-                    loadingManualSlots
-                  }
-                  className="w-full rounded-xl border border-[#dfd2c7] px-4 py-3 disabled:opacity-50"
-                >
+                  <input
+                    type="date"
+                    required
+                    min={todayYMD()}
+                    value={manualDate}
+                    onChange={(e) => {
+                      setManualDate(
+                        e.target.value
+                      );
+                      setManualTime("");
+                    }}
+                    className="w-full rounded-xl border border-[#dfd2c7] px-4 py-3"
+                  />
+                </div>
 
-                  <option value="">
-                    {loadingManualSlots
-                      ? "Cargando horarios..."
-                      : "Selecciona horario"}
-                  </option>
+                {manualMode ===
+                  "package" && (
+                  <div className="rounded-2xl border border-[#e6dbd4] bg-[#fcfaf8] p-4">
 
-                  {manualSlots.map(
-                    (time) => (
-                      <option
-                        key={
-                          time
+                    <div>
+                      <label className="mb-2 block text-sm font-medium">
+                        Cantidad de sesiones
+                      </label>
+
+                      <input
+                        type="number"
+                        min={2}
+                        max={50}
+                        value={packageCount}
+                        onChange={(e) =>
+                          setPackageCount(
+                            Math.max(
+                              2,
+                              Math.min(
+                                50,
+                                Number(
+                                  e.target.value
+                                ) || 2
+                              )
+                            )
+                          )
                         }
-                        value={
-                          time
-                        }
-                      >
-                        {time}
-                      </option>
-                    )
-                  )}
+                        className="w-full rounded-xl border border-[#dfd2c7] bg-white px-4 py-3"
+                      />
+                    </div>
 
-                </select>
+                    <div className="mt-4">
+                      <p className="mb-2 text-sm font-medium">
+                        Días en que vendrá
+                      </p>
 
-                {manualStaffId &&
-                  !loadingManualSlots &&
-                  manualSlots.length ===
-                    0 && (
-                    <p className="text-sm text-red-600">
-                      No hay horarios disponibles para ese día.
+                      <div className="grid grid-cols-2 gap-2 sm:grid-cols-3">
+                        {WEEKDAYS.map(
+                          (day) => {
+                            const active =
+                              packageDays.includes(
+                                day.value
+                              );
+
+                            return (
+                              <button
+                                key={day.value}
+                                type="button"
+                                onClick={() =>
+                                  setPackageDays(
+                                    (current) =>
+                                      active
+                                        ? current.filter(
+                                            (value) =>
+                                              value !==
+                                              day.value
+                                          )
+                                        : [
+                                            ...current,
+                                            day.value,
+                                          ].sort()
+                                  )
+                                }
+                                className={`rounded-xl border px-3 py-3 text-sm transition ${
+                                  active
+                                    ? "border-[#765648] bg-[#765648] text-white"
+                                    : "border-[#dfd2c7] bg-white"
+                                }`}
+                              >
+                                {day.label}
+                              </button>
+                            );
+                          }
+                        )}
+                      </div>
+                    </div>
+
+                    {packageDates.length >
+                      0 && (
+                      <div className="mt-4 rounded-xl bg-white p-4">
+                        <p className="text-sm font-medium text-[#765648]">
+                          Fechas del paquete
+                        </p>
+
+                        <div className="mt-3 max-h-48 space-y-1 overflow-y-auto text-sm text-[#756762]">
+                          {packageDates.map(
+                            (date, index) => (
+                              <p key={date}>
+                                {index + 1}. {formatLongDate(
+                                  date
+                                )}
+                              </p>
+                            )
+                          )}
+                        </div>
+                      </div>
+                    )}
+
+                    <p className="mt-3 text-xs leading-5 text-[#756762]">
+                      Ejemplo: si marcas lunes, miércoles y viernes y eliges 10 sesiones, el sistema tomará las próximas 10 fechas que coincidan con esos días.
                     </p>
-                  )}
+
+                  </div>
+                )}
+
+                <details className="overflow-hidden rounded-2xl border border-[#dfd2c7] bg-white">
+                  <summary className="flex cursor-pointer list-none items-center justify-between gap-3 px-4 py-3 text-sm font-medium text-[#765648]">
+                    <span>Horarios disponibles</span>
+                    <span className="text-xs">Abrir ↓</span>
+                  </summary>
+
+                  <div className="border-t border-[#eee4dd] p-4">
+                    <div>
+                      <label className="mb-2 block text-sm font-medium">
+                        Horario
+                      </label>
+
+                      <select
+                        required
+                        value={manualTime}
+                        onChange={(e) =>
+                          setManualTime(
+                            e.target.value
+                          )
+                        }
+                        disabled={
+                          !manualStaffId ||
+                          (manualMode ===
+                            "single" &&
+                            loadingManualSlots)
+                        }
+                        className="w-full rounded-xl border border-[#dfd2c7] px-4 py-3 disabled:opacity-50"
+                      >
+                        <option value="">
+                          {manualMode ===
+                            "single" &&
+                          loadingManualSlots
+                            ? "Cargando horarios..."
+                            : "Selecciona horario"}
+                        </option>
+
+                        {(manualMode ===
+                        "package"
+                          ? HOURS
+                          : manualSlots
+                        ).map((time) => (
+                          <option
+                            key={time}
+                            value={time}
+                          >
+                            {time}
+                          </option>
+                        ))}
+                      </select>
+                    </div>
+
+                    {manualMode ===
+                      "single" &&
+                      manualStaffId &&
+                      !loadingManualSlots &&
+                      manualSlots.length ===
+                        0 && (
+                        <p className="text-sm text-red-600">
+                          No hay horarios disponibles para ese día.
+                        </p>
+                      )}
+                  </div>
+                </details>
+
+                {manualMode ===
+                  "package" && (
+                  <p className="rounded-xl bg-[#f8f4ef] p-3 text-xs leading-5 text-[#756762]">
+                    Antes de guardar, el sistema comprobará todas las fechas. Si una sola está ocupada, no se creará ninguna sesión hasta que cambies la hora, los días o la profesional.
+                  </p>
+                )}
 
                 <textarea
                   placeholder="Observación opcional"
-                  value={
-                    manualNotes
-                  }
+                  value={manualNotes}
                   onChange={(e) =>
                     setManualNotes(
                       e.target.value
@@ -2324,28 +2896,39 @@ export default function AdminPage() {
 
                 <button
                   type="submit"
-                  disabled={
-                    savingManual
-                  }
+                  disabled={savingManual}
                   className="w-full rounded-full bg-[#765648] px-5 py-3 text-white disabled:cursor-not-allowed disabled:opacity-40"
                 >
                   {savingManual
-                    ? "Guardando..."
+                    ? manualMode ===
+                      "package"
+                      ? "Comprobando y creando sesiones..."
+                      : "Guardando..."
+                    : manualMode ===
+                      "package"
+                    ? `Crear paquete de ${packageCount} sesiones`
                     : "Crear turno"}
                 </button>
 
               </form>
 
-            </section>
+            </AdminTool>
+
+            {/* PROMOCIONES */}
+            <AdminTool
+              eyebrow="Web"
+              title="Promociones y combos"
+            >
+              <PromotionsManager />
+            </AdminTool>
 
             {/* PROFESIONALES */}
-            <section className="mt-6 rounded-3xl bg-white p-6 shadow-sm">
+            <AdminTool
+              eyebrow="Equipo"
+              title="Profesionales"
+            >
 
-              <h2 className="text-xl font-medium">
-                Profesionales
-              </h2>
-
-              <div className="mt-4 space-y-3">
+              <div className="space-y-3">
 
                 {staff.map(
                   (person) => (
@@ -2382,30 +2965,24 @@ export default function AdminPage() {
 
               </div>
 
-            </section>
+            </AdminTool>
 
             {/* BLOQUEAR */}
-            <section className="mt-6 rounded-3xl bg-[#765648] p-6 text-white">
-
-              <h2 className="text-xl font-medium">
-                Bloquear horario
-              </h2>
-
-              <p className="mt-2 text-sm text-white/80">
+            <AdminTool
+              eyebrow="Agenda"
+              title="Bloquear horario"
+              dark
+            >
+              <p className="text-sm text-white/80">
                 El bloqueo afectará a las dos profesionales.
               </p>
 
               <form
-                onSubmit={
-                  createBlock
-                }
+                onSubmit={createBlock}
                 className="mt-5"
               >
-
                 <div className="grid grid-cols-2 gap-2">
-
                   <div>
-
                     <label className="mb-1 block text-xs">
                       Desde
                     </label>
@@ -2415,21 +2992,15 @@ export default function AdminPage() {
                       required
                       min="08:00"
                       max="20:00"
-                      value={
-                        blockStart
-                      }
+                      value={blockStart}
                       onChange={(e) =>
-                        setBlockStart(
-                          e.target.value
-                        )
+                        setBlockStart(e.target.value)
                       }
                       className="w-full rounded-xl bg-white px-3 py-3 text-black"
                     />
-
                   </div>
 
                   <div>
-
                     <label className="mb-1 block text-xs">
                       Hasta
                     </label>
@@ -2439,123 +3010,77 @@ export default function AdminPage() {
                       required
                       min="09:00"
                       max="21:00"
-                      value={
-                        blockEnd
-                      }
+                      value={blockEnd}
                       onChange={(e) =>
-                        setBlockEnd(
-                          e.target.value
-                        )
+                        setBlockEnd(e.target.value)
                       }
                       className="w-full rounded-xl bg-white px-3 py-3 text-black"
                     />
-
                   </div>
-
                 </div>
 
                 <input
                   type="text"
                   placeholder="Motivo opcional"
-                  value={
-                    blockReason
-                  }
+                  value={blockReason}
                   onChange={(e) =>
-                    setBlockReason(
-                      e.target.value
-                    )
+                    setBlockReason(e.target.value)
                   }
                   className="mt-3 w-full rounded-xl bg-white px-4 py-3 text-black"
                 />
 
                 <button
                   type="submit"
-                  disabled={
-                    creatingBlock
-                  }
+                  disabled={creatingBlock}
                   className="mt-3 w-full rounded-full bg-white py-3 font-medium text-[#765648] disabled:opacity-50"
                 >
                   {creatingBlock
                     ? "Bloqueando..."
                     : "Bloquear horario"}
                 </button>
-
               </form>
-
-            </section>
+            </AdminTool>
 
             {/* BLOQUEOS */}
-            <section className="mt-6 rounded-3xl bg-white p-6 shadow-sm">
-
-              <h2 className="text-lg font-medium">
-                Horarios bloqueados
-              </h2>
-
-              {blocksForDate.length ===
-              0 ? (
-
-                <p className="mt-3 text-sm text-[#756762]">
+            <AdminTool
+              eyebrow="Agenda"
+              title="Horarios bloqueados"
+            >
+              {blocksForDate.length === 0 ? (
+                <p className="text-sm text-[#756762]">
                   No hay bloqueos para este día.
                 </p>
-
               ) : (
+                <div className="space-y-3">
+                  {blocksForDate.map((block) => (
+                    <div
+                      key={block.id}
+                      className="flex items-center justify-between gap-4 rounded-xl bg-[#f8f4ef] p-4"
+                    >
+                      <div>
+                        <p className="font-medium">
+                          {formatHour(block.starts_at)} - {formatHour(block.ends_at)}
+                        </p>
 
-                <div className="mt-4 space-y-3">
-
-                  {blocksForDate.map(
-                    (block) => (
-
-                      <div
-                        key={
-                          block.id
-                        }
-                        className="flex items-center justify-between gap-4 rounded-xl bg-[#f8f4ef] p-4"
-                      >
-
-                        <div>
-
-                          <p className="font-medium">
-                            {formatHour(
-                              block.starts_at
-                            )}{" "}
-                            -{" "}
-                            {formatHour(
-                              block.ends_at
-                            )}
+                        {block.reason && (
+                          <p className="mt-1 text-xs text-[#756762]">
+                            {block.reason}
                           </p>
-
-                          {block.reason && (
-                            <p className="mt-1 text-xs text-[#756762]">
-                              {
-                                block.reason
-                              }
-                            </p>
-                          )}
-
-                        </div>
-
-                        <button
-                          type="button"
-                          onClick={() =>
-                            deleteBlock(
-                              block.id
-                            )
-                          }
-                          className="text-sm text-red-600"
-                        >
-                          Liberar
-                        </button>
-
+                        )}
                       </div>
 
-                    )
-                  )}
-
+                      <button
+                        type="button"
+                        onClick={() => deleteBlock(block.id)}
+                        className="text-sm text-red-600"
+                      >
+                        Liberar
+                      </button>
+                    </div>
+                  ))}
                 </div>
-
               )}
-
-            </section>
+            </AdminTool>
 
           </aside>
 

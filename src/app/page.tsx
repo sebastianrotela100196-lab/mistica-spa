@@ -1,4 +1,8 @@
+"use client";
+
+import { useEffect, useState } from "react";
 import BookingForm from "@/app/components/BookingForm";
+import { supabase } from "@/app/lib/supabase";
 
 type ServiceItem = {
   nombre: string;
@@ -11,6 +15,23 @@ type ServiceGroup = {
   text: string;
   decoracion: "lily" | "calla" | "lavender" | "olive";
   items: ServiceItem[];
+};
+
+
+type Promotion = {
+  id: string;
+  title: string;
+  subtitle: string | null;
+  description: string | null;
+  details: string | null;
+  badge: string | null;
+  normal_price: number | null;
+  promo_price: number | null;
+  start_date: string | null;
+  end_date: string | null;
+  whatsapp_message: string | null;
+  active: boolean;
+  sort_order: number;
 };
 
 const servicios: ServiceGroup[] = [
@@ -441,6 +462,367 @@ function Decoration({
   );
 }
 
+
+function formatGuaranies(value: number | null) {
+  if (value === null) {
+    return "";
+  }
+
+  return new Intl.NumberFormat("es-PY").format(value);
+}
+
+function formatPromotionDate(value: string | null) {
+  if (!value) {
+    return "";
+  }
+
+  return new Intl.DateTimeFormat("es-PY", {
+    day: "2-digit",
+    month: "2-digit",
+    year: "numeric",
+  }).format(new Date(`${value}T12:00:00`));
+}
+
+function PromotionsSection() {
+  const [animationKey, setAnimationKey] = useState(0);
+  const [promotions, setPromotions] = useState<Promotion[]>([]);
+  const [currentIndex, setCurrentIndex] = useState(0);
+  const [loading, setLoading] = useState(true);
+
+  useEffect(() => {
+    async function loadPromotions() {
+      setLoading(true);
+
+      const { data, error } = await supabase
+        .from("promotions")
+        .select(
+          `
+          id,
+          title,
+          subtitle,
+          description,
+          details,
+          badge,
+          normal_price,
+          promo_price,
+          start_date,
+          end_date,
+          whatsapp_message,
+          active,
+          sort_order,
+          created_at
+          `
+        )
+        .eq("active", true)
+        .order("sort_order", { ascending: true })
+        .order("created_at", { ascending: false });
+
+      if (error) {
+        console.error("Error cargando promociones:", error);
+        setPromotions([]);
+        setLoading(false);
+        return;
+      }
+
+      setPromotions((data ?? []) as Promotion[]);
+      setCurrentIndex(0);
+      setAnimationKey((current) => current + 1);
+      setLoading(false);
+    }
+
+    loadPromotions();
+  }, []);
+
+  useEffect(() => {
+    if (promotions.length <= 1) return;
+
+    const interval = window.setInterval(() => {
+      setCurrentIndex((current) => (current + 1) % promotions.length);
+      setAnimationKey((current) => current + 1);
+    }, 6000);
+
+    return () => window.clearInterval(interval);
+  }, [promotions.length]);
+
+  function previousPromotion() {
+    if (promotions.length === 0) return;
+
+    setCurrentIndex((current) =>
+      current === 0 ? promotions.length - 1 : current - 1
+    );
+    setAnimationKey((current) => current + 1);
+  }
+
+  function nextPromotion() {
+    if (promotions.length === 0) return;
+
+    setCurrentIndex((current) => (current + 1) % promotions.length);
+    setAnimationKey((current) => current + 1);
+  }
+
+  function goToPromotion(index: number) {
+    setCurrentIndex(index);
+    setAnimationKey((current) => current + 1);
+  }
+
+  if (loading) {
+    return (
+      <section
+        id="promociones"
+        className="promo-zone relative overflow-hidden px-4 py-16 sm:px-6"
+      >
+        <div className="mx-auto max-w-6xl text-center text-sm text-[#69636B]">
+          Cargando promociones...
+        </div>
+      </section>
+    );
+  }
+
+  if (promotions.length === 0) {
+    return null;
+  }
+
+  const promotion = promotions[currentIndex];
+  const detailLines =
+    promotion.details
+      ?.split("\n")
+      .map((line) => line.trim())
+      .filter(Boolean) ?? [];
+
+  const whatsappMessage =
+    promotion.whatsapp_message ||
+    `Hola Mistica Spa, quiero consultar por la promoción ${promotion.title}.`;
+
+  const whatsappUrl = `https://wa.me/595981490443?text=${encodeURIComponent(
+    whatsappMessage
+  )}`;
+
+  const savings =
+    promotion.normal_price !== null &&
+    promotion.promo_price !== null &&
+    promotion.normal_price > promotion.promo_price
+      ? promotion.normal_price - promotion.promo_price
+      : null;
+
+  const discountPercent =
+    savings !== null && promotion.normal_price
+      ? Math.round((savings / promotion.normal_price) * 100)
+      : null;
+
+  return (
+    <section
+      id="promociones"
+      className="promo-zone relative overflow-hidden px-4 py-20 sm:px-6 sm:py-24"
+    >
+      <div className="promo-orb promo-orb-1" />
+      <div className="promo-orb promo-orb-2" />
+      <div className="promo-orb promo-orb-3" />
+      <div className="promo-shine" />
+
+      <OliveBranch className="-left-12 -top-12 scale-[0.8] opacity-25" />
+      <LavenderBranch className="-bottom-24 -right-4 scale-[0.85] opacity-30" />
+
+      <div className="relative z-10 mx-auto max-w-6xl">
+        <div className="mx-auto mb-10 max-w-2xl text-center">
+          <span className="promo-label inline-flex rounded-full border border-[#815799]/20 bg-white/70 px-5 py-2 text-[0.68rem] font-bold uppercase tracking-[0.34em] text-[#633A78] shadow-sm backdrop-blur">
+            Promociones activas
+          </span>
+
+          <h2 className="mt-5 font-display text-4xl font-semibold text-[#3B174D] sm:text-5xl md:text-6xl">
+            Beneficios especiales para ti
+          </h2>
+
+          <p className="mt-4 text-sm leading-6 text-[#69636B]">
+            Descubre los combos y promociones disponibles en Mistica Spa.
+          </p>
+        </div>
+
+        <article
+          key={animationKey}
+          className="promo-slide relative overflow-hidden rounded-[2.5rem] border border-white/20 bg-gradient-to-br from-[#351544] via-[#5C2D6D] to-[#8E61A5] p-6 text-white shadow-[0_35px_100px_rgba(99,58,120,0.38)] sm:p-9 md:p-12"
+        >
+          <div className="promo-card-glow" />
+          <LilyFlower className="-bottom-24 -right-8 z-[1] scale-[0.9] opacity-50" />
+          <PetalCluster className="right-[12%] top-[5%] opacity-35" />
+
+          <div className="relative z-10 grid gap-8 md:grid-cols-[1.2fr_0.8fr] md:items-center">
+            <div>
+              <div className="flex flex-wrap items-center gap-3">
+                {promotion.badge && (
+                  <span className="promo-badge inline-flex rounded-full border border-white/30 bg-white/12 px-4 py-2 text-xs font-semibold uppercase tracking-[0.22em] backdrop-blur">
+                    {promotion.badge}
+                  </span>
+                )}
+
+                {discountPercent !== null && (
+                  <span className="promo-discount rounded-full bg-[#D7E1A7] px-4 py-2 text-xs font-extrabold uppercase tracking-[0.15em] text-[#344526] shadow-lg">
+                    -{discountPercent}%
+                  </span>
+                )}
+              </div>
+
+              {promotion.subtitle && (
+                <p className="mt-6 text-xs font-semibold uppercase tracking-[0.3em] text-[#E5D6EB]">
+                  {promotion.subtitle}
+                </p>
+              )}
+
+              <h3 className="mt-3 max-w-2xl font-display text-5xl font-semibold leading-[0.95] sm:text-6xl">
+                {promotion.title}
+              </h3>
+
+              {promotion.description && (
+                <p className="mt-5 max-w-xl text-sm leading-7 text-white/82 sm:text-base">
+                  {promotion.description}
+                </p>
+              )}
+
+              {detailLines.length > 0 && (
+                <div className="mt-7 space-y-3">
+                  {detailLines.map((detail, index) => (
+                    <div
+                      key={`${detail}-${index}`}
+                      className="promo-detail flex gap-3 rounded-2xl border border-white/10 bg-white/10 p-4 backdrop-blur"
+                      style={{ animationDelay: `${index * 90}ms` }}
+                    >
+                      <span className="mt-1 flex h-6 w-6 shrink-0 items-center justify-center rounded-full bg-[#D7E1A7] text-xs font-bold text-[#344526]">
+                        ✓
+                      </span>
+
+                      <p className="text-sm font-medium leading-6">{detail}</p>
+                    </div>
+                  ))}
+                </div>
+              )}
+            </div>
+
+            <div className="promo-price-card relative rounded-[1.8rem] bg-[#F9F6F0] p-6 text-[#33283A] shadow-2xl sm:p-8">
+              {savings !== null && (
+                <div className="mb-5 rounded-2xl bg-[#EDF2DD] p-4 text-[#4B5E2C]">
+                  <p className="text-[0.68rem] font-bold uppercase tracking-[0.22em]">
+                    Ahorras
+                  </p>
+                  <p className="mt-1 text-2xl font-extrabold">
+                    {formatGuaranies(savings)} Gs
+                  </p>
+                </div>
+              )}
+
+              {promotion.normal_price !== null && (
+                <>
+                  <p className="text-xs font-semibold uppercase tracking-[0.2em] text-[#7D7480]">
+                    Precio normal
+                  </p>
+                  <p className="mt-2 text-2xl font-semibold text-[#7C787A] line-through decoration-red-500 decoration-2 sm:text-3xl">
+                    {formatGuaranies(promotion.normal_price)} Gs
+                  </p>
+                </>
+              )}
+
+              {promotion.promo_price !== null && (
+                <div className="mt-6">
+                  <p className="text-xs font-semibold uppercase tracking-[0.2em] text-[#815799]">
+                    Precio promoción
+                  </p>
+                  <p className="mt-2 font-display text-5xl font-bold leading-none text-[#3B174D] sm:text-6xl">
+                    {formatGuaranies(promotion.promo_price)}
+                  </p>
+                  <p className="mt-2 text-sm font-semibold">Gs</p>
+                </div>
+              )}
+
+              {(promotion.start_date || promotion.end_date) && (
+                <div className="mt-6 rounded-xl bg-[#EFE7F2] p-4 text-xs leading-5 text-[#645769]">
+                  {promotion.start_date && promotion.end_date && (
+                    <p>
+                      Vigente del {formatPromotionDate(promotion.start_date)} al{" "}
+                      {formatPromotionDate(promotion.end_date)}
+                    </p>
+                  )}
+
+                  {promotion.start_date && !promotion.end_date && (
+                    <p>
+                      Disponible desde el{" "}
+                      {formatPromotionDate(promotion.start_date)}
+                    </p>
+                  )}
+
+                  {!promotion.start_date && promotion.end_date && (
+                    <p>
+                      Disponible hasta el{" "}
+                      {formatPromotionDate(promotion.end_date)}
+                    </p>
+                  )}
+                </div>
+              )}
+
+              <a
+                href={whatsappUrl}
+                target="_blank"
+                rel="noopener noreferrer"
+                className="promo-cta lux-button mt-7 block w-full rounded-full bg-[#815799] px-6 py-4 text-center font-semibold text-white hover:bg-[#633A78]"
+              >
+                Quiero esta promoción
+              </a>
+            </div>
+          </div>
+        </article>
+
+        {promotions.length > 1 && (
+          <>
+            <div className="mx-auto mt-7 h-1.5 max-w-xl overflow-hidden rounded-full bg-[#D8C9DE]/70">
+              <div
+                key={`progress-${animationKey}`}
+                className="promo-progress h-full rounded-full bg-gradient-to-r from-[#633A78] via-[#A675B6] to-[#6F9140]"
+              />
+            </div>
+
+            <div className="mt-6 flex items-center justify-center gap-4">
+              <button
+                type="button"
+                onClick={previousPromotion}
+                aria-label="Promoción anterior"
+                className="promo-arrow flex h-12 w-12 items-center justify-center rounded-full border border-[#815799]/25 bg-white/90 text-2xl text-[#633A78] shadow-md transition hover:bg-[#815799] hover:text-white"
+              >
+                ‹
+              </button>
+
+              <div className="flex items-center gap-2">
+                {promotions.map((item, index) => (
+                  <button
+                    key={item.id}
+                    type="button"
+                    aria-label={`Ver promoción ${index + 1}`}
+                    onClick={() => goToPromotion(index)}
+                    className={`h-2.5 rounded-full transition-all duration-300 ${
+                      currentIndex === index
+                        ? "w-9 bg-[#815799] shadow-[0_0_14px_rgba(129,87,153,0.55)]"
+                        : "w-2.5 bg-[#CDB3D9] hover:bg-[#A675B6]"
+                    }`}
+                  />
+                ))}
+              </div>
+
+              <button
+                type="button"
+                onClick={nextPromotion}
+                aria-label="Siguiente promoción"
+                className="promo-arrow flex h-12 w-12 items-center justify-center rounded-full border border-[#815799]/25 bg-white/90 text-2xl text-[#633A78] shadow-md transition hover:bg-[#815799] hover:text-white"
+              >
+                ›
+              </button>
+            </div>
+
+            <p className="mt-3 text-center text-xs font-medium tracking-[0.08em] text-[#817684]">
+              {currentIndex + 1} de {promotions.length} promociones
+            </p>
+          </>
+        )}
+      </div>
+    </section>
+  );
+}
+
 export default function Home() {
   return (
     <main className="min-h-screen overflow-hidden bg-[#F7F4EE] text-[#2E2830]">
@@ -471,6 +853,10 @@ export default function Home() {
 
             <a href="#inicio" className="transition hover:text-[#815799]">
               Inicio
+            </a>
+
+            <a href="#promociones" className="transition hover:text-[#815799]">
+              Promociones
             </a>
 
             <a href="#servicios" className="transition hover:text-[#815799]">
@@ -554,6 +940,13 @@ export default function Home() {
               </a>
 
               <a
+                href="#promociones"
+                className="lux-button rounded-full bg-[#2F7057] px-7 py-4 font-semibold text-white hover:bg-[#255B47]"
+              >
+                Promociones
+              </a>
+
+              <a
                 href="https://wa.me/595981490443"
                 target="_blank"
                 rel="noopener noreferrer"
@@ -605,6 +998,9 @@ export default function Home() {
         </div>
 
       </section>
+
+      {/* PROMOCIONES */}
+      <PromotionsSection />
 
       {/* SERVICIOS */}
       <section

@@ -490,3 +490,200 @@ h3,
   background: #633a78;
   animation-delay: 4s;
 }
+/* =========================================
+   PROMOCIONES DESTACADAS
+========================================= */
+
+.promo-zone {
+  background:
+    radial-gradient(
+      circle at 15% 20%,
+      rgba(205, 179, 217, 0.55),
+      transparent 32%
+    ),
+    radial-gradient(
+      circle at 85% 75%,
+      rgba(129, 87, 153, 0.28),
+      transparent 35%
+    ),
+    linear-gradient(
+      135deg,
+      #f7f1f9 0%,
+      #eee2f2 45%,
+      #f9f6ef 100%
+    );
+}
+
+@keyframes promoSlideIn {
+  0% {
+    opacity: 0;
+    transform:
+      translateX(120px)
+      scale(0.94)
+      rotateY(-7deg);
+    filter: blur(5px);
+  }
+
+  55% {
+    opacity: 1;
+    transform:
+      translateX(-10px)
+      scale(1.015)
+      rotateY(1deg);
+    filter: blur(0);
+  }
+
+  100% {
+    opacity: 1;
+    transform:
+      translateX(0)
+      scale(1)
+      rotateY(0);
+  }
+}
+
+.promo-slide {
+  animation:
+    promoSlideIn 0.85s
+    cubic-bezier(0.22, 1, 0.36, 1)
+    both;
+  transform-origin: center;
+}
+
+@keyframes promoFloat {
+  0%,
+  100% {
+    transform: translateY(0);
+  }
+
+  50% {
+    transform: translateY(-7px);
+  }
+}
+
+.promo-slide:hover {
+  animation:
+    promoFloat 3s
+    ease-in-out infinite;
+}
+
+@keyframes promoProgress {
+  from {
+    width: 0%;
+  }
+
+  to {
+    width: 100%;
+  }
+}
+
+.promo-progress {
+  animation:
+    promoProgress 6s
+    linear forwards;
+}
+
+@keyframes promoOrbFloat1 {
+  0%,
+  100% {
+    transform:
+      translate(0, 0)
+      scale(1);
+  }
+
+  50% {
+    transform:
+      translate(35px, -25px)
+      scale(1.12);
+  }
+}
+
+@keyframes promoOrbFloat2 {
+  0%,
+  100% {
+    transform:
+      translate(0, 0)
+      scale(1);
+  }
+
+  50% {
+    transform:
+      translate(-25px, 30px)
+      scale(0.9);
+  }
+}
+
+.promo-orb {
+  position: absolute;
+  border-radius: 9999px;
+  filter: blur(55px);
+  pointer-events: none;
+}
+
+.promo-orb-1 {
+  left: -70px;
+  top: 20%;
+  width: 220px;
+  height: 220px;
+  background: rgba(129, 87, 153, 0.33);
+  animation:
+    promoOrbFloat1 8s
+    ease-in-out infinite;
+}
+
+.promo-orb-2 {
+  right: -80px;
+  bottom: 10%;
+  width: 260px;
+  height: 260px;
+  background: rgba(141, 162, 73, 0.22);
+  animation:
+    promoOrbFloat2 9s
+    ease-in-out infinite;
+}
+
+.promo-orb-3 {
+  left: 50%;
+  top: -100px;
+  width: 180px;
+  height: 180px;
+  background: rgba(205, 179, 217, 0.33);
+  animation:
+    promoOrbFloat1 11s
+    ease-in-out infinite reverse;
+}
+
+@keyframes promoShine {
+  0% {
+    transform:
+      translateX(-140%)
+      rotate(12deg);
+  }
+
+  55%,
+  100% {
+    transform:
+      translateX(220%)
+      rotate(12deg);
+  }
+}
+
+.promo-shine {
+  position: absolute;
+  left: 0;
+  top: -35%;
+  width: 28%;
+  height: 170%;
+  pointer-events: none;
+  background:
+    linear-gradient(
+      90deg,
+      transparent,
+      rgba(255, 255, 255, 0.32),
+      transparent
+    );
+  filter: blur(8px);
+  animation:
+    promoShine 6s
+    ease-in-out infinite;
+}
