@@ -579,7 +579,7 @@ h3,
 
 .promo-progress {
   animation:
-    promoProgress 6s
+    promoProgress 15s
     linear forwards;
 }
 

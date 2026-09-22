@@ -539,7 +539,7 @@ function PromotionsSection() {
     const interval = window.setInterval(() => {
       setCurrentIndex((current) => (current + 1) % promotions.length);
       setAnimationKey((current) => current + 1);
-    }, 6000);
+    }, 15000);
 
     return () => window.clearInterval(interval);
   }, [promotions.length]);
