@@ -1316,84 +1316,21 @@ export default function AdminPage() {
     setSavingManual(true);
 
     /*
-     * Primero comprobamos TODAS las fechas.
-     * Si una está ocupada, no creamos ninguna.
-     */
-    const occupiedDates: string[] = [];
-
-    for (const date of packageDates) {
-      const {
-        data,
-        error,
-      } = await supabase.rpc(
-        "get_available_slots",
-        {
-          p_date: date,
-          p_staff_id:
-            manualStaffId,
-        }
-      );
-
-      if (error) {
-        console.error(error);
-        setSavingManual(false);
-
-        alert(
-          `No se pudo comprobar la disponibilidad del ${formatLongDate(
-            date
-          )}:\n${error.message}`
-        );
-
-        return;
-      }
-
-      const slots =
-        (data ?? []).map(
-          (
-            row: {
-              slot_time: string;
-            }
-          ) =>
-            row.slot_time.slice(
-              0,
-              5
-            )
-        );
-
-      if (
-        !slots.includes(
-          manualTime
-        )
-      ) {
-        occupiedDates.push(date);
-      }
-    }
-
-    if (occupiedDates.length > 0) {
-      setSavingManual(false);
-
-      const detail = occupiedDates
-        .map(
-          (date) =>
-            `• ${formatLongDate(
-              date
-            )} - ${manualTime}`
-        )
-        .join("\n");
-
-      alert(
-        `No se creó el paquete porque estos horarios no están disponibles:\n\n${detail}\n\nCambia la hora, los días o la profesional.`
-      );
-
-      return;
-    }
-
-    /*
-     * Todas las fechas están libres.
-     * Ahora creamos las reservas una por una.
-     * Si una falla por una carrera de concurrencia,
-     * eliminamos las ya creadas para no dejar
-     * un paquete incompleto.
+     * PAQUETES:
+     *
+     * No usamos get_available_slots() para validar todas
+     * las fechas antes de crear el paquete.
+     *
+     * Esa comprobación podía marcar horarios como ocupados
+     * aunque la agenda estuviera vacía.
+     *
+     * create_booking() es la validación definitiva:
+     * si una fecha realmente está ocupada o bloqueada,
+     * Supabase rechazará solamente esa creación.
+     *
+     * Si alguna sesión falla, eliminamos todas las sesiones
+     * que se hayan creado durante este intento para evitar
+     * dejar un paquete incompleto.
      */
     const createdIds: string[] = [];
 
