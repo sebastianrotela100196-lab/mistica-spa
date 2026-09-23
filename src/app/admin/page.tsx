@@ -776,7 +776,6 @@ export default function AdminPage() {
     manualDate,
     manualStaffId,
     manualMode,
-    manualTime,
   ]);
 
   // HORARIOS REPROGRAMACIÓN
